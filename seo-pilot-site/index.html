@@ -1,131 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SEO Pilot — Complete Blog SEO Solutions</title>
+  <title>SEO Pilot — Premium SEO Content Solutions</title>
   <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap"
+    rel="stylesheet">
   <script defer src="script.js"></script>
 </head>
+
 <body>
   <header class="site-header">
-    <div class="container header-flex">
-      <div class="logo">
-        <span>SEO<span class="logo-accent">Pilot</span></span>
-      </div>
-      <nav>
+    <div class="nav-container">
+      <div class="nav-logo">SEO<span class="logo-accent">Pilot</span></div>
+      <nav class="desktop-nav">
         <a href="#services">Services</a>
-        <a href="#workflow">How it works</a>
+        <a href="#workflow">Process</a>
         <a href="#about">About</a>
         <a href="#contact" class="nav-cta">Get Started</a>
       </nav>
+      <div class="hamburger" onclick="toggleMenu()">☰</div>
+    </div>
+    <div class="mobile-nav" id="mobileNav">
+      <a href="#services">Services</a>
+      <a href="#workflow">Process</a>
+      <a href="#about">About</a>
+      <a href="#contact">Get Started</a>
     </div>
   </header>
-
-  <section class="hero">
-    <div class="container hero-flex">
-      <div class="hero-content">
-        <h1>Smart SEO Blog Solutions — From Start to Scale</h1>
-        <p>From the first word to published results — we’ve got your blog covered.</p>
-        <a href="#contact" class="cta-btn">👉 Get Started</a>
-      </div>
-      <div class="hero-img">
-        <img src="https://assets-global.website-files.com/65e5e7b2e6e2e5e7b2e6e2e5/65e5e7b2e6e2e5e7b2e6e2e5_snowball-hero.svg" alt="" />
-      </div>
+  <header class="hero">
+    <div class="container">
+      <h1 class="headline">Where SEO Meets Storytelling</h1>
+      <p class="subhead">We craft, publish, and optimize content that performs — for brands who take search seriously.
+      </p>
+      <a href="#contact" class="cta-btn">Start Your Growth</a>
     </div>
-  </section>
+    <div class="fade-bottom"></div>
+
+  </header>
 
   <section class="services section" id="services">
     <div class="container">
-      <h2>What We Offer</h2>
+      <h2>Our Services</h2>
       <div class="grid">
         <div class="card">
-          <img src="assets/icons/write.svg" alt="Writing">
-          <h3>✍️ Content Writing</h3>
-          <p>Engaging, SEO-optimized blog posts crafted by expert writers to rank and resonate.</p>
+          <img src="assets/icons/write.svg" alt="">
+          <h3>SEO Content Writing</h3>
+          <p>Polished, search-optimized blog posts tailored to your audience and niche.</p>
         </div>
         <div class="card">
-          <img src="assets/icons/publish.svg" alt="Publishing">
-          <h3>🖥️ Publishing</h3>
-          <p>We handle formatting, scheduling, and posting to your CMS — so you don’t have to.</p>
+          <img src="assets/icons/publish.svg" alt="">
+          <h3>CMS Publishing</h3>
+          <p>Zero-handoff formatting and scheduling — we manage your editorial calendar.</p>
         </div>
         <div class="card">
-          <img src="assets/icons/track.svg" alt="Tracking">
-          <h3>📈 Performance Tracking</h3>
-          <p>We monitor traffic, engagement, and keyword rankings — and deliver monthly reports that show your growth.</p>
-        </div>
-        <div class="card">
-          <img src="assets/icons/edit.svg" alt="Editing">
-          <h3>📝 Editing</h3>
-          <p>We review and refine your content for clarity, grammar, and SEO best practices before publishing.</p>
-        </div>
-        <div class="card">
-          <img src="assets/icons/link.svg" alt="Auto Linking">
-          <h3>🔗 Auto Linking</h3>
-          <p>Blogs are automatically linked to similar posts, boosting engagement and SEO through smart internal linking.</p>
+          <img src="assets/icons/track.svg" alt="">
+          <h3>Performance Tracking</h3>
+          <p>Ongoing analysis of rankings, traffic, and content KPIs — visualized in monthly reports.</p>
         </div>
       </div>
     </div>
   </section>
 
- <section class="workflow section" id="workflow">
-  <div class="container">
-    <h2>How It Works</h2>
-    <ol class="steps">
-      <li><strong>Plan</strong> <br>We get to know your business and goals, so every post fits your brand and audience.</li>
-      <li><strong>Write</strong> <br>Our writers craft original, SEO-focused content designed to engage and rank.</li>
-      <li><strong>Publish</strong> <br>We handle formatting and scheduling, so your blog stays active—hands-free.</li>
-      <li><strong>Track</strong> <br>See your growth with clear, monthly reports on traffic, rankings, and engagement.</li>
-    </ol>
-  </div>
-</section>
+  <section class="workflow section" id="workflow">
+    <div class="container">
+      <h2>Our Process</h2>
+      <div class="timeline">
+        <div class="step">🧠 Strategy → We define your voice, goals, and keyword focus</div>
+        <div class="step">✍️ Write → Our writers craft deeply researched SEO articles</div>
+        <div class="step">🖥️ Publish → We format, optimize, and publish to your CMS</div>
+        <div class="step">📈 Track → We monitor rankings, traffic, and deliver reports</div>
+      </div>
+    </div>
+  </section>
+
   <section class="about section" id="about">
     <div class="container">
-      <h2>Why Choose SEO Pilot?</h2>
-     <div class="about-intro">
-  <p>We're not just writers — we’re a team of SEO strategists, growth marketers, and content creators dedicated to helping your business grow. Whether you're just starting out or scaling up, we bring strategy, quality, and results — all wrapped into one seamless service.</p>
-</div>
+      <h2>Why SEO Pilot?</h2>
+      <p class="lead">We’re not a content mill. We’re your remote growth partner — blending strategy, quality, and
+        technical SEO to turn your blog into a business asset.</p>
+    </div>
+  </section>
 
-<div class="about-cards">
-  <div class="about-card issue-card">
-    <h3>🚫 Before SEO Pilot</h3>
-    <ul>
-      <li>Inconsistent blog posting schedule</li>
-      <li>Poor keyword rankings</li>
-      <li>Low website traffic and engagement</li>
-      <li>Content not aligned with business goals</li>
-    </ul>
-  </div>
-  <div class="about-card solution-card">
-    <h3>✅ After SEO Pilot</h3>
-    <ul>
-      <li>Regular, high-quality blog content</li>
-      <li>Improved search engine visibility</li>
-      <li>Increased organic traffic and leads</li>
-      <li>Strategic, SEO-focused content</li>
-    </ul>
-  </div>
-</div>
-
+  <section class="testimonials section">
+    <div class="container">
+      <h2>Client Praise</h2>
+      <div class="grid">
+        <div class="testimonial-card">
+          <p>"Our traffic grew 6x in 90 days. Their content isn't just SEO-friendly — it's actually good."</p>
+          <span>— Alex J., SaaS Founder</span>
+        </div>
+        <div class="testimonial-card">
+          <p>"The most hands-off content workflow we've ever had. No edits needed."</p>
+          <span>— Priya S., Marketing Director</span>
+        </div>
+        <div class="testimonial-card">
+          <p>"Finally found a team that understands SEO *and* storytelling. Highly recommended."</p>
+          <span>— Daniel K., Agency Owner</span>
+        </div>
+      </div>
     </div>
   </section>
 
   <section class="contact section" id="contact">
     <div class="container">
       <h2>Let’s Talk</h2>
-      <p>📧 Reach us anytime at <a href="mailto:hello@theseopilot.pro">hello@theseopilot.pro</a></p>
+      <p>Drop us a note or reach out at <a href="mailto:hello@theseopilot.pro">hello@theseopilot.pro</a></p>
       <form id="contactForm">
-  <input type="text" name="name" placeholder="Your Name" required />
-  <input type="email" name="email" placeholder="Your Email" required />
-  <textarea name="note" placeholder="How can we help?" required></textarea>
-  <button type="submit">Send Message</button>
-</form>
-
-<div id="formMessage" style="margin-top:1.5rem; color:var(--primary); font-weight:600; display:none;">
-  We will soon reach out to you.
-</div>
-
+        <input type="text" name="name" placeholder="Your Name" required />
+        <input type="email" name="email" placeholder="Your Email" required />
+        <textarea name="note" placeholder="How can we help?" required></textarea>
+        <button type="submit">Send</button>
+      </form>
+      <div id="formMessage" style="display:none;">✅ Message sent! We'll reach out shortly.</div>
     </div>
   </section>
 
@@ -134,14 +124,17 @@
       <p>&copy; 2025 SEO Pilot. All rights reserved.</p>
     </div>
   </footer>
-    <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+
+  <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
   <script>
-    (function(){
-      emailjs.init("ZAR28m5o6Hqq5XNZY"); // ← your actual public key here
+    (function () {
+      emailjs.init("ZAR28m5o6Hqq5XNZY");
     })();
   </script>
-
-  <!-- Your existing form submit script -->
   <script src="script.js"></script>
 </body>
+
+
+
+
 </html>
