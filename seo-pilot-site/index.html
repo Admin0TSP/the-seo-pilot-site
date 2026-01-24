@@ -4,18 +4,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SEO Pilot — Premium SEO Content Solutions</title>
+  <title>TheSEOPilot — Premium SEO Content Solutions</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/img/favicon.ico" type="image/x-icon" />
+  <!-- ✅ Preload hero -->
+  <link rel="preload" as="image" href="assets/img/image2.webp" />
+
+  <!-- ✅ Preload fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="style"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" />
+
+  <!-- ✅ Load the stylesheet normally after preload -->
   <link rel="stylesheet" href="style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap"
-    rel="stylesheet">
+    rel="stylesheet" />
+
   <script defer src="script.js"></script>
 </head>
 
+
+
+
 <body>
+  <!-- Navigation -->
   <header class="site-header">
     <div class="nav-container">
-      <div class="nav-logo">SEO<span class="logo-accent">Pilot</span></div>
+      <a href="https://theseopilot.pro/" class="nav-brand link-wrapper">
+        <div class="nav-logo-circle-frame">
+          <img src="assets/img/logo-footer.webp" loading="lazy" alt="TheSEOPilot Logo" class="nav-logo" />
+        </div>
+        <div class="nav-logo">The<span class="logo-accent">SEO</span>Pilot</div>
+      </a>
+
+
       <nav class="desktop-nav">
         <a href="#services">Services</a>
         <a href="#workflow">Process</a>
@@ -31,110 +55,270 @@
       <a href="#contact">Get Started</a>
     </div>
   </header>
-  <header class="hero">
-    <div class="container">
-      <h1 class="headline">Where SEO Meets Storytelling</h1>
-      <p class="subhead">We craft, publish, and optimize content that performs — for brands who take search seriously.
-      </p>
-      <a href="#contact" class="cta-btn">Start Your Growth</a>
-    </div>
-    <div class="fade-bottom"></div>
 
+  <!-- Hero Section -->
+  <header class="hero">
+    <video id="heroVideo" muted loop playsinline class="hero-video" poster="assets/img/image2.webp"></video>
+
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        const video = document.getElementById("heroVideo");
+        const source = document.createElement("source");
+        source.src = "assets/img/hero-bg.mp4";
+        source.type = "video/mp4";
+        video.appendChild(source);
+        video.play();
+      });
+    </script>
+
+    <div class="container">
+      <h1 class="headline fade-in">Built for Search & Tuned for Your Voice</h1>
+      <p class="subhead fade-in">We craft, publish, and optimize content with AI that performs as an asset for you.</p>
+      <a href="#contact" class="cta-btn fade-in">Start Your Growth</a>
+    </div>
   </header>
 
+
+  <!-- Services -->
   <section class="services section" id="services">
     <div class="container">
-      <h2>Our Services</h2>
-      <div class="grid">
-        <div class="card">
-          <img src="assets/icons/write.svg" alt="">
-          <h3>SEO Content Writing</h3>
+      <h2 class="service-row fade-in">Our Services</h2>
+
+      <!-- SEO Content Writing -->
+      <h3 class="service-heading fade-in">SEO Content Writing</h3>
+      <div class="service-row fade-right">
+        <div class="service-img">
+          <img src="assets/img/seo-optimization.webp" loading="lazy" alt="SEO Optimization" />
+        </div>
+        <div class="service-text">
           <p>Polished, search-optimized blog posts tailored to your audience and niche.</p>
+          <p class="service-description">
+            We go beyond keywords - we research your industry, competitors, and target queries to craft long-form
+            content
+            that ranks, builds authority, and actually gets read. Every article is written by trained SEO writers and
+            reviewed by senior editors for clarity and intent.
+          </p>
         </div>
-        <div class="card">
-          <img src="assets/icons/publish.svg" alt="">
-          <h3>CMS Publishing</h3>
-          <p>Zero-handoff formatting and scheduling — we manage your editorial calendar.</p>
+      </div>
+
+      <!-- AI Detection Comparison -->
+      <h3 class="comparison-heading fade-in">AI Content Detection: Before & After</h3>
+      <div class="comparison-wrapper">
+        <div class="comparison-image slide-in-left">
+          <img src="assets/img/ai-before.webp" loading="lazy" alt="Before Optimization" />
+          <p class="comparison-caption">Before Optimization</p>
         </div>
-        <div class="card">
-          <img src="assets/icons/track.svg" alt="">
-          <h3>Performance Tracking</h3>
-          <p>Ongoing analysis of rankings, traffic, and content KPIs — visualized in monthly reports.</p>
+        <div class="transition-label fade-up">✨ Improved by <span>
+            TheSEOPilot</span></div>
+        <div class="comparison-image slide-in-right">
+          <img src="assets/img/ai-after.webp" loading="lazy" alt="After Optimization" />
+          <p class="comparison-caption">After Optimization</p>
+        </div>
+      </div>
+
+      <!-- Auto-Linking -->
+      <h3 class="service-heading fade-in">Auto-Linking</h3>
+      <div class="service-row reverse fade-left">
+        <div class="service-img">
+          <img src="assets/img/auto-linking.webp" loading="lazy" alt="Auto-Linking" />
+        </div>
+        <div class="service-text">
+          <p>Intelligent internal linking suggestions to boost SEO and user engagement.</p>
+          <p class="service-description">
+            We scan your entire blog archive and build smart, contextual links between related posts - reviving older
+            articles and increasing crawlability. This improves session time, lowers bounce rate, and boosts topical
+            authority.
+          </p>
         </div>
       </div>
     </div>
   </section>
 
+
+
+
+
+  <!-- Workflow -->
   <section class="workflow section" id="workflow">
     <div class="container">
-      <h2>Our Process</h2>
-      <div class="timeline">
-        <div class="step">🧠 Strategy → We define your voice, goals, and keyword focus</div>
-        <div class="step">✍️ Write → Our writers craft deeply researched SEO articles</div>
-        <div class="step">🖥️ Publish → We format, optimize, and publish to your CMS</div>
-        <div class="step">📈 Track → We monitor rankings, traffic, and deliver reports</div>
+      <h2 class="service-row fade-in">Our Process</h2>
+
+      <!-- Desktop View: Full Process Image -->
+      <div class="workflow-image fade-in desktop-view">
+        <img src="assets/img/steps.webp" loading="lazy" alt="6-step SEO Process by TheSEOPilot" />
+      </div>
+
+      <!-- Mobile View: Step-wise Image Grid with Arrows -->
+      <div class="process-mobile">
+        <div class="process-row">
+          <div class="process-step slide-in-left">
+            <img src="assets/img/step1.webp" loading="lazy" alt="Step 1" />
+            <p>1. Discovery</p>
+          </div>
+          <div class="arrow right">→</div>
+          <div class="process-step slide-in-right">
+            <img src="assets/img/step2.webp" loading="lazy" alt="Step 2" />
+            <p>2. Research</p>
+          </div>
+        </div>
+
+        <div class="arrow down">↓</div>
+
+        <div class="process-row">
+          <div class="process-step slide-in-left">
+            <img src="assets/img/step3.webp" loading="lazy" alt="Step 3" />
+            <p>3. Writing</p>
+          </div>
+          <div class="arrow right">→</div>
+          <div class="process-step slide-in-right">
+            <img src="assets/img/step4.webp" loading="lazy" alt="Step 4" />
+            <p>4. Feedback</p>
+          </div>
+        </div>
+
+        <div class="arrow down">↓</div>
+
+        <div class="process-row">
+          <div class="process-step slide-in-left">
+            <img src="assets/img/step5.webp" loading="lazy" alt="Step 5" />
+            <p>5. Editing</p>
+          </div>
+          <div class="arrow right">→</div>
+          <div class="process-step slide-in-right">
+            <img src="assets/img/step6.webp" loading="lazy" alt="Step 6" />
+            <p>6. Publish & Tracking</p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
+
+
+  <!-- About -->
   <section class="about section" id="about">
     <div class="container">
-      <h2>Why SEO Pilot?</h2>
-      <p class="lead">We’re not a content mill. We’re your remote growth partner — blending strategy, quality, and
-        technical SEO to turn your blog into a business asset.</p>
-    </div>
-  </section>
+      <h2 class="fade-in">Why TheSEOPilot?</h2>
+      <p class="lead fade-in">
+        We’re not a content mill. We’re your dedicated SEO content growth partner - blending editorial quality with
+        search
+        performance to turn your blog into a business asset.
+      </p>
 
-  <section class="testimonials section">
-    <div class="container">
-      <h2>Client Praise</h2>
-      <div class="grid">
-        <div class="testimonial-card">
-          <p>"Our traffic grew 6x in 90 days. Their content isn't just SEO-friendly — it's actually good."</p>
-          <span>— Alex J., SaaS Founder</span>
+      <div class="about-grid">
+        <div class="about-point fade-in">
+          <h3>🎯 Content That Sounds Like You</h3>
+          <p>Our writers don’t just write - they learn your voice, understand your audience, and align with your brand
+            so
+            every piece feels like it came straight from your team.</p>
         </div>
-        <div class="testimonial-card">
-          <p>"The most hands-off content workflow we've ever had. No edits needed."</p>
-          <span>— Priya S., Marketing Director</span>
+        <div class="about-point fade-in">
+          <h3>🔍 SEO Is The Stencil For Content</h3>
+          <p>We don’t do filler. Every article is built around real search intent, strategic keywords, and smart
+            linking - so your
+            content performs, not just exists.</p>
         </div>
-        <div class="testimonial-card">
-          <p>"Finally found a team that understands SEO *and* storytelling. Highly recommended."</p>
-          <span>— Daniel K., Agency Owner</span>
+        <div class="about-point fade-in">
+          <h3>🛠️ We Handle Everything</h3>
+          <p>From content briefs to uploading into your CMS, our workflow is hands-free for you. You get great
+            content - without lifting a finger.</p>
+        </div>
+        <div class="about-point fade-in">
+          <h3>📈 Know What’s Working</h3>
+          <p>Every month, you’ll get clear insights into what’s driving traffic, how your rankings are shifting, and
+            what’s trending in your performance.</p>
         </div>
       </div>
     </div>
   </section>
 
+
+  <!-- Testimonials -->
+  <section class="testimonials section" id="testimonials">
+    <div class="container">
+      <h2 class="fade-in">Client Praise</h2>
+      <div class="testimonial-grid">
+        <div class="testimonial-card fade-in" style="transition-delay: 0.1s">
+          <p>"TheSEOPilot helped us go from ghosted by Google to front page visibility. We've seen a 312% rise in
+            organic
+            traffic in under 5 months."</p>
+          <span>-Raj Mehta, Founder of HireBolt</span>
+        </div>
+        <div class="testimonial-card fade-in" style="transition-delay: 0.2s">
+          <p>"The clarity and quality of content TheSEOPilot delivers is great. They feel more like a growth partner
+            than a vendor."</p>
+          <span>-Laura T., CMO at Beamly AI</span>
+        </div>
+        <div class="testimonial-card fade-in" style="transition-delay: 0.3s">
+          <p>"We finally stopped guessing what to write. TheSEOPilot’s strategy brought consistency, performance, and
+            confidence."</p>
+          <span>-James W., Head of Content at NovaLearn</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Contact -->
   <section class="contact section" id="contact">
     <div class="container">
-      <h2>Let’s Talk</h2>
-      <p>Drop us a note or reach out at <a href="mailto:hello@theseopilot.pro">hello@theseopilot.pro</a></p>
-      <form id="contactForm">
+      <h2 class="fade-in">Let’s Talk</h2>
+      <p class="contact-intro fade-in">
+        Drop us a note or reach out at
+        <a href="mailto:hello@theseopilot.pro">hello@theseopilot.pro</a>
+      </p>
+
+      <form id="contactForm" class="fade-in">
         <input type="text" name="name" placeholder="Your Name" required />
         <input type="email" name="email" placeholder="Your Email" required />
         <textarea name="note" placeholder="How can we help?" required></textarea>
         <button type="submit">Send</button>
       </form>
-      <div id="formMessage" style="display:none;">✅ Message sent! We'll reach out shortly.</div>
+      <div id="formMessage" class="contact-intro fade-in" style="display:none;">✅ Message sent! We'll reach out shortly.
+      </div>
+
     </div>
   </section>
 
-  <footer>
-    <div class="container">
-      <p>&copy; 2025 SEO Pilot. All rights reserved.</p>
-    </div>
-  </footer>
-
-  <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+  <!-- EmailJS -->
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
   <script>
     (function () {
       emailjs.init("ZAR28m5o6Hqq5XNZY");
     })();
   </script>
+  <script id="omnidimension-web-widget" async
+    src="https://backend.omnidim.io/web_widget.js?secret_key=c128810afd0f302bcc9528923acd31d8"></script>
   <script src="script.js"></script>
+
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <div class="footer-brand">
+        <div class="logo-circle-frame">
+          <img src="assets/img/logo-footer.webp" loading="lazy" alt="TheSEOPilot Logo" class="footer-logo" />
+        </div>
+        <div>
+          <div class="nav-logo">The<span class="logo-accent">SEO</span>Pilot</div>
+          <p>Your SEO Growth Partner.</p>
+        </div>
+      </div>
+
+      <div class="footer-links">
+        <h5>Legal</h5>
+        <ul>
+          <li><a href="privacy.html" target="_blank" rel="noopener">Privacy</a></li>
+          <li><a href="terms.html" target="_blank" rel="noopener">Terms</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <div class="copyright">
+    <p>&copy; 2025 TheSEOPilot. All rights reserved.</p>
+  </div>
+
 </body>
-
-
-
 
 </html>
