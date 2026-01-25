@@ -1,0 +1,19 @@
+{
+  "name": "the-seo-pilot-site",
+  "version": "1.0.0",
+  "description": "TheSEOPilot - Premium SEO Content Solutions Website",
+  "scripts": {
+    "start": "npx http-server -p 8000 -c-1",
+    "dev": "npx http-server -p 8000 -c-1"
+  },
+  "keywords": [
+    "seo",
+    "content",
+    "marketing"
+  ],
+  "author": "TheSEOPilot",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {}
+}
+
