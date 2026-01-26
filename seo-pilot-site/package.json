@@ -4,7 +4,8 @@
   "description": "TheSEOPilot - Premium SEO Content Solutions Website",
   "scripts": {
     "start": "npx http-server -p 8000 -c-1",
-    "dev": "npx http-server -p 8000 -c-1"
+    "dev": "npx http-server -p 8000 -c-1",
+    "generate": "node scripts/generate-resources.js"
   },
   "keywords": [
     "seo",
@@ -13,7 +14,9 @@
   ],
   "author": "TheSEOPilot",
   "license": "MIT",
-  "devDependencies": {},
+  "devDependencies": {
+    "dotenv": "^16.3.1"
+  },
   "dependencies": {}
 }
 

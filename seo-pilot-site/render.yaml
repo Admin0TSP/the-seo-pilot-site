@@ -2,7 +2,7 @@ services:
   - type: web
     name: the-seo-pilot-site
     env: static
-    buildCommand: ""
+    buildCommand: npm install && npm run generate
     staticPublishPath: .
     headers:
       - path: /*

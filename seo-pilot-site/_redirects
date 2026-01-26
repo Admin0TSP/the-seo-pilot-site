@@ -1,5 +1,8 @@
-# ✅ Redirect all requests to index.html (for SPA support)
-/*    /index.html   200
+# Clean URL redirects (old → new)
+/privacy.html    /privacy/    301
+/terms.html      /terms/      301
+/resources/case-studies/study.html    /resources/case-studies/    301
+/resources/blog/post.html             /resources/blog/            301
 
-# ✅ Redirect www to non-www
-https://www.theseopilot.pro/*    https://theseopilot.pro/:splat   301!
+# www → non-www
+https://www.theseopilot.pro/*    https://theseopilot.pro/:splat    301!

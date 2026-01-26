@@ -40,9 +40,10 @@ git push origin main
    - **Name**: `the-seo-pilot-site` (or your preferred name)
    - **Branch**: `main`
    - **Root Directory**: Leave empty (or `seo-pilot-site` if your files are in a subdirectory)
-   - **Build Command**: Leave empty (static site)
-   - **Publish Directory**: `.` (or the folder containing index.html)
-6. Click **"Create Static Site"**
+   - **Build Command**: `npm install && npm run generate` (or use render.yaml)
+   - **Publish Directory**: `.`
+6. Add **Environment** variables if using Contentful: `CONTENTFUL_SPACE_ID`, `CONTENTFUL_ACCESS_TOKEN`
+7. Click **"Create Static Site"**
 
 ### 3. Environment Variables (Optional)
 
@@ -68,18 +69,40 @@ If you need to change EmailJS or other configurations:
 
 ```
 the-seo-pilot-site/
-├── index.html          # Main page
-├── terms.html          # Terms of Service
-├── privacy.html        # Privacy Policy
-├── style.css           # Styles
-├── script.js           # JavaScript
-├── _redirects          # Netlify redirects (not used on Render)
-├── render.yaml         # Render configuration
-├── .gitignore          # Git ignore rules
-├── .env.example        # Environment variables template
-└── assets/             # Images and media
-    └── img/
+├── index.html              # Main page
+├── style.css               # Styles
+├── script.js               # JavaScript
+├── privacy/
+│   └── index.html          # Privacy (clean URL: /privacy/)
+├── terms/
+│   └── index.html          # Terms (clean URL: /terms/)
+├── resources/
+│   ├── index.html          # Resources hub
+│   ├── blog/
+│   │   └── index.html      # Blog listing (+ generated /blog/{slug}/)
+│   └── case-studies/
+│       ├── index.html      # Case studies listing
+│       └── aspora-ai-visibility/
+│           └── index.html  # Aspora case study
+├── scripts/
+│   └── generate-resources.js  # Contentful → static HTML
+├── _redirects              # Redirects (privacy.html → /privacy/, etc.)
+├── render.yaml             # Render configuration
+├── .env.example            # Env template (Contentful)
+└── assets/img/             # Images (including case-studies/)
 ```
+
+## Clean URLs
+
+- `/privacy/`, `/terms/` (no .html)
+- `/resources/`, `/resources/blog/`, `/resources/case-studies/`
+- `/resources/blog/{slug}/`, `/resources/case-studies/{slug}/` (no ?slug=)
+
+Old URLs redirect: `privacy.html` → `/privacy/`, etc.
+
+## Resources & Contentful
+
+Blog and case studies can be driven by [Contentful](https://www.contentful.com/). The build runs `npm run generate`, which fetches content and generates static HTML. See **docs/CONTENTFUL-SETUP.md** and **.env.example**. Set `CONTENTFUL_SPACE_ID` and `CONTENTFUL_ACCESS_TOKEN` in Render Environment if you use Contentful.
 
 ## Current Configuration
 
