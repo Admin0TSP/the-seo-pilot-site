@@ -69,7 +69,18 @@ npm run generate
 
 Build command is `npm install && npm run generate`. Ensure `CONTENTFUL_SPACE_ID` and `CONTENTFUL_ACCESS_TOKEN` are set in Render **Environment**.
 
-## 6. Aspora graph image
+## 6. Blog preview (Contentful)
+
+To preview **draft** blog posts on your site:
+
+1. Deploy the **Preview API** (`preview-api/`) as a separate Render Web Service.
+2. Set **Contentful → Settings → Content preview** → Preview URL:
+   `https://www.theseopilot.pro/blog-preview?slug={{entry.fields.slug}}`
+3. Configure `blog-preview/config.js` with your Preview API base URL.
+
+See **docs/PREVIEW-SETUP.md** for full steps.
+
+## 7. Aspora graph image
 
 Add the GSC growth graph as:
 

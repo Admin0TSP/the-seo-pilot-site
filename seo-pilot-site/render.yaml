@@ -29,4 +29,20 @@ services:
       - path: /*.js
         name: Cache-Control
         value: public, max-age=31536000, immutable
+      # Allow Contentful to embed blog preview in iframe (Settings → Content preview)
+      - path: /blog-preview
+        name: Content-Security-Policy
+        value: frame-ancestors 'self' https://app.contentful.com https://be.contentful.com https://*.contentful.com;
+
+  - type: web
+    name: tsp-blog-preview-api
+    runtime: node
+    rootDir: preview-api
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: CONTENTFUL_SPACE_ID
+        sync: false
+      - key: CONTENTFUL_PREVIEW_TOKEN
+        sync: false
 

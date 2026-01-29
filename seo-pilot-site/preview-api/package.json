@@ -1,0 +1,17 @@
+{
+  "name": "tsp-blog-preview-api",
+  "version": "1.0.0",
+  "description": "Contentful Preview API proxy for TSP blog preview",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2"
+  }
+}
