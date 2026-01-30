@@ -22,16 +22,12 @@ const CASE_STUDY_CT = process.env.CONTENTFUL_CASE_STUDY_CONTENT_TYPE || 'caseStu
 const {
   unwrap,
   resolveEntry,
-  resolveAsset,
-  assetUrl,
   escapeHtml,
   escapeAttr,
-  buildBodyFromContentBlocks,
   getSeo,
   getAuthor,
   getFeaturedImageUrl,
   formatPublishedDate,
-  buildFaqsHtml,
   buildResultsFromResultBlocks,
   richTextToHtml,
 } = require('./contentful-helpers');
@@ -223,8 +219,8 @@ ${footer()}
     const slug = unwrap(f.slug) || it.sys?.id || 'post';
     const title = unwrap(f.title) || 'Untitled';
     const subtitle = unwrap(f.subtitle) || '';
-    const blocks = unwrap(f.contentBlocks) || unwrap(f.content_blocks) || unwrap(f.blocks) || unwrap(f.sections) || [];
-    const body = buildBodyFromContentBlocks(blocks, includes, apiItems);
+    const contentRich = unwrap(f.content);
+    const body = contentRich && contentRich.content ? richTextToHtml(contentRich, includes) : '';
 
     const seoEntry = resolveSeoRef(it, includes, apiItems);
     const seo = getSeo(seoEntry);
@@ -245,24 +241,13 @@ ${footer()}
     const publishedDateFormatted = formatPublishedDate(publishedDateRaw);
     const publishedDateHtml = publishedDateFormatted ? `<time class="blog-published-date" datetime="${escapeAttr(publishedDateRaw)}">${escapeHtml(publishedDateFormatted)}</time>` : '';
 
-    const faqsRefs = unwrap(f.faqs) || [];
-    const { html: faqsHtml, items: faqSchemaItems } = buildFaqsHtml(faqsRefs, includes, apiItems);
-
-    const faqSchemaJson = faqSchemaItems.length > 0
-      ? JSON.stringify({
-          '@context': 'https://schema.org',
-          '@type': 'FAQPage',
-          mainEntity: faqSchemaItems.map(({ question, answer }) => ({
-            '@type': 'Question',
-            name: question,
-            acceptedAnswer: { '@type': 'Answer', text: answer },
-          })),
-        })
+    const faqsRich = unwrap(f.faqs);
+    const faqsHtml = faqsRich && faqsRich.content && faqsRich.content.length
+      ? `<section class="blog-faqs" aria-labelledby="faqs-heading"><h2 id="faqs-heading" class="faqs-heading">Frequently Asked Questions</h2><div class="faq-content blog-content">${richTextToHtml(faqsRich, includes)}</div></section>`
       : '';
 
     const headOpts = {};
     if (featuredImageAbsolute) headOpts.ogImage = featuredImageAbsolute;
-    if (faqSchemaJson) headOpts.schemaJson = faqSchemaJson;
 
     const metaRow = [publishedDateHtml, authorHtml].filter(Boolean).join('');
 

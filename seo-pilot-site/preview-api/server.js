@@ -12,12 +12,11 @@ const cors = require('cors');
 const {
   unwrap,
   resolveEntry,
-  buildBodyFromContentBlocks,
   getSeo,
   getAuthor,
   getFeaturedImageUrl,
   formatPublishedDate,
-  buildFaqsHtml,
+  richTextToHtml,
   escapeHtml,
   escapeAttr,
 } = require('./contentful-helpers');
@@ -121,11 +120,13 @@ app.get('/api/preview', async (req, res) => {
     const f = entry.fields;
     const title = unwrap(f.title) || 'Untitled';
     const subtitle = unwrap(f.subtitle) || '';
-    const contentBlocks = unwrap(f.contentBlocks) || unwrap(f.content_blocks) || unwrap(f.blocks) || unwrap(f.sections) || [];
-    const body = buildBodyFromContentBlocks(contentBlocks, includes, items);
+    const contentRich = unwrap(f.content);
+    const body = contentRich && contentRich.content ? richTextToHtml(contentRich, includes) : '';
 
-    const faqsRefs = unwrap(f.faqs) || [];
-    const { html: faqsHtml } = buildFaqsHtml(faqsRefs, includes, items);
+    const faqsRich = unwrap(f.faqs);
+    const faqsHtml = faqsRich && faqsRich.content && faqsRich.content.length
+      ? `<section class="blog-faqs" aria-labelledby="faqs-heading"><h2 id="faqs-heading" class="faqs-heading">Frequently Asked Questions</h2><div class="faq-content blog-content">${richTextToHtml(faqsRich, includes)}</div></section>`
+      : '';
 
     const featuredImageUrl = getFeaturedImageUrl(entry, includes);
     const featuredImageAbsolute = featuredImageUrl ? (featuredImageUrl.startsWith('//') ? 'https:' + featuredImageUrl : featuredImageUrl) : '';

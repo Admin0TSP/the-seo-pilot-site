@@ -1,6 +1,6 @@
 /**
  * Shared helpers for Contentful (generate + preview-api).
- * Architecture: Page – Blog Post, Page – Case Study, Component – SEO, Content Block, Result Block.
+ * Architecture: Page – Blog Post (rich text content, faqs), Page – Case Study, Component – SEO, Result Block.
  */
 
 const { documentToHtmlString } = require('@contentful/rich-text-html-renderer');
@@ -120,79 +120,6 @@ function blockTypeClass(blockType) {
   return ['text', 'image', 'quote', 'list', 'code', 'cta'].includes(t) ? t : 'text';
 }
 
-const CTA_TYPE = process.env.CONTENTFUL_CTA_BLOCK_TYPE || 'ctaBlock';
-const RICH_BLOCK_TYPE = process.env.CONTENTFUL_RICH_CONTENT_BLOCK_TYPE || 'richContentBlock';
-
-/**
- * Build HTML body from Page – Blog Post content blocks (references).
- * blockRefs: array of links { sys: { id } } or resolved entries.
- * includes: { Entry: [], Asset: [] }; items: optional entry array to also search when resolving.
- * Supports: richText/rich_text/body/content, blockType/block_type, CTA (heading, description, buttonText, buttonUrl).
- */
-function buildBodyFromContentBlocks(blockRefs, includes, items = []) {
-  if (!Array.isArray(blockRefs)) return '';
-  const DEBUG = process.env.CONTENTFUL_DEBUG === '1' || process.env.CONTENTFUL_DEBUG === 'true';
-  const parts = [];
-  for (let i = 0; i < blockRefs.length; i++) {
-    const r = blockRefs[i];
-    const id = r && r.sys && r.sys.id ? r.sys.id : null;
-    if (!id) continue;
-    const isResolved = r.fields && r.sys && r.sys.type === 'Entry';
-    const entry = isResolved ? r : resolveEntry(id, includes, items);
-    if (!entry || !entry.fields) {
-      if (DEBUG) console.warn(`[Contentful] Block ${i} id=${id} not resolved`);
-      continue;
-    }
-    const ct = entry.sys?.contentType?.sys?.id;
-    const f = entry.fields;
-
-    if (ct === CTA_TYPE) {
-      const heading = unwrap(f.heading) || '';
-      const desc = unwrap(f.description) || '';
-      const btn = unwrap(f.buttonText) || unwrap(f.button_label) || 'Learn more';
-      const url = unwrap(f.buttonUrl) || unwrap(f.button_url) || '#';
-      let h = '';
-      if (heading) h += `<h3 class="cta-block-heading">${escapeHtml(heading)}</h3>`;
-      if (desc) h += `<p class="cta-block-desc">${escapeHtml(desc)}</p>`;
-      if (url && btn) h += `<a href="${escapeAttr(url)}" class="cta-btn">${escapeHtml(btn)}</a>`;
-      if (h) parts.push(`<div class="content-block content-block--cta">${h}</div>`);
-      continue;
-    }
-
-    if (ct !== RICH_BLOCK_TYPE) {
-      if (DEBUG) console.warn(`[Contentful] Block ${i} id=${id} unknown type ${ct}, skip`);
-      continue;
-    }
-
-    const rich = unwrap(f.richText) || unwrap(f.rich_text) || unwrap(f.body) || unwrap(f.content);
-    const img = unwrap(f.image);
-    const caption = unwrap(f.caption) || '';
-    const fullWidth = unwrap(f.fullWidth) || unwrap(f.full_width);
-    const blockType = unwrap(f.blockType) || unwrap(f.block_type);
-    const typeClass = blockTypeClass(blockType);
-    let html = '';
-    if (rich && rich.content && Array.isArray(rich.content) && rich.content.length) {
-      html = richTextToHtml(rich, includes);
-    }
-    if (img && img.sys && img.sys.id) {
-      const asset = resolveAsset(img.sys.id, includes);
-      const u = assetUrl(asset);
-      if (u) {
-        html += `<figure class="content-block-figure"><img src="${u}" alt="${escapeAttr(caption)}" loading="lazy" />${caption ? `<figcaption>${escapeHtml(caption)}</figcaption>` : ''}</figure>`;
-      }
-    }
-    if (html) {
-      const base = 'content-block content-block--' + typeClass;
-      const full = fullWidth ? ' content-block--full' : '';
-      parts.push(`<div class="${base}${full}">${html}</div>`);
-    }
-  }
-  if (DEBUG && parts.length === 0 && blockRefs.length > 0) {
-    console.warn('[Contentful] buildBodyFromContentBlocks: no blocks rendered', { blockRefsLength: blockRefs.length, includesEntryCount: (includes && includes.Entry && includes.Entry.length) || 0 });
-  }
-  return parts.join('\n');
-}
-
 /**
  * Extract SEO fields from resolved Component – SEO entry.
  */
@@ -207,8 +134,6 @@ function getSeo(seoEntry) {
     nofollow: unwrap(f.nofollow),
   };
 }
-
-const FAQ_TYPE = process.env.CONTENTFUL_FAQ_COMPONENT_TYPE || 'componentFaq';
 
 /**
  * Format published date for display (e.g. "January 29, 2026").
@@ -233,44 +158,6 @@ function getFeaturedImageUrl(entry, includes) {
   if (!img || !img.sys || !img.sys.id) return '';
   const asset = resolveAsset(img.sys.id, includes);
   return assetUrl(asset);
-}
-
-/**
- * Build FAQs HTML and return { html, items } for schema. items: [{ question, answer }].
- * FAQ component: question (short text), answer (rich text or long text).
- */
-function buildFaqsHtml(faqRefs, includes, items = []) {
-  if (!Array.isArray(faqRefs)) return { html: '', items: [] };
-  const ids = faqRefs.map((r) => (r && r.sys && r.sys.id) || null).filter(Boolean);
-  const parts = [];
-  const schemaItems = [];
-  for (const id of ids) {
-    const entry = resolveEntry(id, includes, items);
-    if (!entry || !entry.fields) continue;
-    const f = entry.fields;
-    const question = unwrap(f.question) || unwrap(f.question_text) || '';
-    if (!question) continue;
-    let answerHtml = '';
-    let answerText = '';
-    const answerVal = unwrap(f.answer);
-    if (answerVal && typeof answerVal === 'object' && answerVal.content && Array.isArray(answerVal.content) && answerVal.content.length) {
-      answerHtml = richTextToHtml(answerVal, includes);
-      answerText = stripHtml(answerHtml);
-    } else if (typeof answerVal === 'string') {
-      answerHtml = escapeHtml(answerVal).replace(/\n/g, '<br />');
-      answerText = answerVal;
-    }
-    if (!answerHtml && !answerText) continue;
-    parts.push(`<div class="faq-item"><h3 class="faq-question">${escapeHtml(question)}</h3><div class="faq-answer">${answerHtml || escapeHtml(answerText)}</div></div>`);
-    schemaItems.push({ question, answer: answerText || stripHtml(answerHtml) });
-  }
-  const html = parts.length ? `<section class="blog-faqs" aria-labelledby="faqs-heading"><h2 id="faqs-heading" class="faqs-heading">Frequently Asked Questions</h2><div class="faq-list">${parts.join('\n')}</div></section>` : '';
-  return { html, items: schemaItems };
-}
-
-function stripHtml(html) {
-  if (!html || typeof html !== 'string') return '';
-  return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
 /**
@@ -331,12 +218,9 @@ module.exports = {
   richTextToHtml,
   escapeHtml,
   escapeAttr,
-  blockTypeClass,
-  buildBodyFromContentBlocks,
   getSeo,
   getAuthor,
   getFeaturedImageUrl,
   formatPublishedDate,
-  buildFaqsHtml,
   buildResultsFromResultBlocks,
 };
