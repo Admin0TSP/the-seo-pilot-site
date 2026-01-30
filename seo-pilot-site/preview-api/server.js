@@ -42,11 +42,11 @@ app.use(cors({
 }));
 app.use(express.json());
 
-function resolveSeoRef(entry, includes) {
+function resolveSeoRef(entry, includes, items = []) {
   const f = entry.fields || {};
   const ref = unwrap(f.seoFields) || unwrap(f.seo);
   const id = ref && ref.sys && ref.sys.id;
-  return id ? resolveEntry(id, includes) : null;
+  return id ? resolveEntry(id, includes, items) : null;
 }
 
 app.get('/api/preview', async (req, res) => {
@@ -71,7 +71,7 @@ app.get('/api/preview', async (req, res) => {
     const q = new URLSearchParams({
       content_type: BLOG_CT,
       limit: '1',
-      include: '3',
+      include: '5',
     });
     if (id) {
       q.set('sys.id', id);
@@ -108,10 +108,10 @@ app.get('/api/preview', async (req, res) => {
     const f = entry.fields;
     const title = unwrap(f.title) || 'Untitled';
     const subtitle = unwrap(f.subtitle) || '';
-    const contentBlocks = unwrap(f.contentBlocks) || unwrap(f.content_blocks) || [];
-    const body = buildBodyFromContentBlocks(contentBlocks, includes);
+    const contentBlocks = unwrap(f.contentBlocks) || unwrap(f.content_blocks) || unwrap(f.blocks) || unwrap(f.sections) || [];
+    const body = buildBodyFromContentBlocks(contentBlocks, includes, items);
 
-    const seoEntry = resolveSeoRef(entry, includes);
+    const seoEntry = resolveSeoRef(entry, includes, items);
     const seo = getSeo(seoEntry);
     const seoTitle = seo.pageTitle || title;
     const seoDescription = seo.pageDescription || subtitle;

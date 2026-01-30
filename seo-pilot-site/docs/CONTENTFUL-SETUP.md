@@ -28,7 +28,7 @@ In **Content model**, each content type has an **API identifier**. The code uses
 | Author | Reference → Author | ❌ | `author` |
 | Published date | Date | ✓ | `publishedDate` |
 | Featured image | Media | ❌ | `featuredImage` |
-| Content blocks | Reference (many) → Content Block | ✓ | `contentBlocks` |
+| Content blocks | Reference (many) → Rich Content Block, CTA Block | ✓ | `contentBlocks` (or `content_blocks`, `blocks`, `sections`) |
 | Related blog posts | Reference (many) | ❌ | `relatedBlogPosts` |
 | SEO fields | Reference → **Component – SEO** | ✓ | `seoFields` or `seo` |
 
@@ -69,12 +69,12 @@ Referenced by every page. API ID: `seoComponent`.
 
 ## 5. Component – Content Block
 
-Used in **Content blocks** (Page – Blog Post). API ID: `richContentBlock`. The generator also accepts `rich_text`, `block_type`, `full_width`, and `content_blocks` as field IDs.
+Used in **Content blocks** (Page – Blog Post). API ID: `richContentBlock`. **CTA Block** (`ctaBlock`) can also be used in the same Reference (many) field; it is rendered as a styled CTA (heading, description, button).
 
 | Field | Type | API ID (example) |
 |-------|------|------------------|
 | Block type | Dropdown: **text**, **image**, **quote**, **list**, **code** | `blockType` |
-| Rich text | Rich text | `richText` |
+| Rich text | Rich text | `richText` (or `rich_text`, `body`, `content`) |
 | Image | Media | `image` |
 | Caption | Short text | `caption` |
 | Full width | Boolean | `fullWidth` |
@@ -115,7 +115,8 @@ npm install
 npm run generate
 ```
 
-- Fetches **Page – Blog Post** and **Page – Case Study** with `include=2` (resolves SEO, content blocks, result blocks).
+- Fetches **Page – Blog Post** and **Page – Case Study** with `include=5` (resolves SEO, content blocks, CTA blocks, result blocks, assets).
+- Set `CONTENTFUL_DEBUG=1` when running `npm run generate` to log block-resolution warnings if content is missing.
 - Outputs `resources/blog/index.html`, `resources/blog/{slug}/index.html`, `resources/case-studies/index.html`, `resources/case-studies/{slug}/index.html`.
 - If env is missing, the script skips without changing files.
 

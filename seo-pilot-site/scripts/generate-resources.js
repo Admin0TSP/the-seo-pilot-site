@@ -25,8 +25,10 @@ const {
   resolveAsset,
   assetUrl,
   escapeHtml,
+  escapeAttr,
   buildBodyFromContentBlocks,
   getSeo,
+  getAuthor,
   buildResultsFromResultBlocks,
   richTextToHtml,
 } = require('./contentful-helpers');
@@ -145,11 +147,18 @@ function writeFile(filePath, content) {
   fs.writeFileSync(filePath, content, 'utf8');
 }
 
-function resolveSeoRef(entry, includes) {
+function resolveSeoRef(entry, includes, items = []) {
   const f = entry.fields || {};
   const ref = unwrap(f.seoFields) || unwrap(f.seo);
   const id = ref && ref.sys && ref.sys.id;
-  return id ? resolveEntry(id, includes) : null;
+  return id ? resolveEntry(id, includes, items) : null;
+}
+
+function resolveAuthorRef(entry, includes, items = []) {
+  const f = entry.fields || {};
+  const ref = unwrap(f.author);
+  const id = ref && ref.sys && ref.sys.id;
+  return id ? resolveEntry(id, includes, items) : null;
 }
 
 async function generateBlog(data) {
@@ -201,19 +210,26 @@ ${footer()}
 
   writeFile(path.join(ROOT, 'resources', 'blog', 'index.html'), blogIndex);
 
+  const apiItems = data.items || [];
   for (const it of listing) {
     const f = it.fields || {};
     const slug = unwrap(f.slug) || it.sys?.id || 'post';
     const title = unwrap(f.title) || 'Untitled';
     const subtitle = unwrap(f.subtitle) || '';
-    const blocks = unwrap(f.contentBlocks) || unwrap(f.content_blocks) || [];
-    const body = buildBodyFromContentBlocks(blocks, includes);
+    const blocks = unwrap(f.contentBlocks) || unwrap(f.content_blocks) || unwrap(f.blocks) || unwrap(f.sections) || [];
+    const body = buildBodyFromContentBlocks(blocks, includes, apiItems);
 
-    const seoEntry = resolveSeoRef(it, includes);
+    const seoEntry = resolveSeoRef(it, includes, apiItems);
     const seo = getSeo(seoEntry);
     const seoTitle = seo.pageTitle || title;
     const seoDescription = seo.pageDescription || subtitle;
     const canonical = seo.canonicalUrl || `${BASE}/resources/blog/${encodeURIComponent(slug)}/`;
+
+    const authorEntry = resolveAuthorRef(it, includes, apiItems);
+    const author = getAuthor(authorEntry, includes);
+    const authorHtml = author
+      ? `<div class="blog-author"><div class="blog-author-inner">${author.avatarUrl ? `<img src="${escapeAttr(author.avatarUrl)}" alt="" class="blog-author-avatar" loading="lazy" />` : ''}<div><span class="blog-author-name">${escapeHtml(author.name)}</span>${author.roleCompany ? `<span class="blog-author-role">${escapeHtml(author.roleCompany)}</span>` : ''}${author.bio ? `<p class="blog-author-bio">${escapeHtml(author.bio)}</p>` : ''}</div></div></div>`
+      : '';
 
     const postHtml = `<!DOCTYPE html>
 <html lang="en">
@@ -231,6 +247,7 @@ ${header()}
     <div class="container blog-post-container">
       <h1 class="blog-post-title">${escapeHtml(title)}</h1>
       ${subtitle ? `<p class="blog-post-subtitle">${escapeHtml(subtitle)}</p>` : ''}
+      ${authorHtml}
       <div class="legal-page blog-content-wrapper">
         <div class="blog-content">${body || '<p class="blog-content-empty">No content yet.</p>'}</div>
       </div>
@@ -274,7 +291,7 @@ async function generateCaseStudies(data) {
     const firstResult = resultsBlocks[0];
     let metric = unwrap(f.keyMetrics) || '';
     if (!metric && firstResult && firstResult.sys && firstResult.sys.id) {
-      const rb = resolveEntry(firstResult.sys.id, includes);
+      const rb = resolveEntry(firstResult.sys.id, includes, data.items || []);
       if (rb && rb.fields) {
         const v = unwrap(rb.fields.metricValue);
         const l = unwrap(rb.fields.metricLabel);
@@ -328,7 +345,7 @@ ${footer()}
     const challenge = unwrap(f.challenge) || '';
     const strategy = unwrap(f.strategy);
     const resultsBlocks = unwrap(f.resultsBlocks) || [];
-    const resultsHtml = buildResultsFromResultBlocks(resultsBlocks, includes);
+    const resultsHtml = buildResultsFromResultBlocks(resultsBlocks, includes, data.items || []);
 
     let strategyHtml = '';
     if (strategy) {
@@ -386,8 +403,8 @@ async function main() {
 
   try {
     const [blogRes, csRes] = await Promise.all([
-      fetchContentful(`/entries?content_type=${BLOG_CT}&order=-fields.publishedDate&include=3`),
-      fetchContentful(`/entries?content_type=${CASE_STUDY_CT}&order=-sys.updatedAt&include=3`).catch(() => ({ items: [], includes: {} })),
+      fetchContentful(`/entries?content_type=${BLOG_CT}&order=-fields.publishedDate&include=5`),
+      fetchContentful(`/entries?content_type=${CASE_STUDY_CT}&order=-sys.updatedAt&include=5`).catch(() => ({ items: [], includes: {} })),
     ]);
     await generateBlog(blogRes);
     await generateCaseStudies(csRes);

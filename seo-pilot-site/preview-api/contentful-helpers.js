@@ -1,9 +1,12 @@
 /**
- * Contentful helpers for Preview API (Page – Blog Post architecture).
+ * Contentful helpers for Preview API (Page – Blog Post, content blocks, CTA).
  */
 
 const { documentToHtmlString } = require('@contentful/rich-text-html-renderer');
 const { BLOCKS } = require('@contentful/rich-text-types');
+
+const RICH_BLOCK_TYPE = process.env.CONTENTFUL_RICH_CONTENT_BLOCK_TYPE || 'richContentBlock';
+const CTA_TYPE = process.env.CONTENTFUL_CTA_BLOCK_TYPE || 'ctaBlock';
 
 function unwrap(x) {
   if (x == null) return undefined;
@@ -14,8 +17,10 @@ function unwrap(x) {
   return x;
 }
 
-function resolveEntry(id, includes) {
-  const list = (includes && includes.Entry) || [];
+function resolveEntry(id, includes, items = []) {
+  const fromItems = Array.isArray(items) ? items : [];
+  const fromIncludes = (includes && includes.Entry) || [];
+  const list = [...fromItems, ...fromIncludes];
   return list.find((e) => e.sys && e.sys.id === id) || null;
 }
 
@@ -48,6 +53,12 @@ function escapeAttr(s) {
     .replace(/'/g, '&#39;');
 }
 
+function blockTypeClass(blockType) {
+  if (!blockType || typeof blockType !== 'string') return 'text';
+  const t = blockType.toLowerCase().replace(/\s+/g, '-');
+  return ['text', 'image', 'quote', 'list', 'code', 'cta'].includes(t) ? t : 'text';
+}
+
 function richTextToHtml(doc, includes = {}) {
   if (!doc || !doc.content) return '';
   const options = {
@@ -61,25 +72,40 @@ function richTextToHtml(doc, includes = {}) {
       },
       [BLOCKS.EMBEDDED_ENTRY]: (node) => {
         const id = node.data?.target?.sys?.id;
-        const entry = resolveEntry(id, includes);
+        const entry = resolveEntry(id, includes, []);
         if (!entry || !entry.fields) return '';
+        const ct = entry.sys?.contentType?.sys?.id;
         const f = entry.fields;
-        const rich = unwrap(f.richText) || unwrap(f.rich_text);
-        const img = unwrap(f.image);
-        const cap = unwrap(f.caption) || '';
-        const fullWidth = unwrap(f.fullWidth) || unwrap(f.full_width);
-        const blockType = unwrap(f.blockType) || unwrap(f.block_type);
-        const typeClass = blockTypeClass(blockType);
-        let html = '';
-        if (rich && rich.content && Array.isArray(rich.content)) html = richTextToHtml(rich, includes);
-        if (img && img.sys && img.sys.id) {
-          const a = resolveAsset(img.sys.id, includes);
-          const u = assetUrl(a);
-          if (u) html += `<figure class="content-block-figure"><img src="${u}" alt="${escapeAttr(cap)}" loading="lazy" />${cap ? `<figcaption>${escapeHtml(cap)}</figcaption>` : ''}</figure>`;
+        if (ct === CTA_TYPE) {
+          const heading = unwrap(f.heading) || '';
+          const desc = unwrap(f.description) || '';
+          const btn = unwrap(f.buttonText) || unwrap(f.button_label) || 'Learn more';
+          const url = unwrap(f.buttonUrl) || unwrap(f.button_url) || '#';
+          let h = '';
+          if (heading) h += `<h3 class="cta-block-heading">${escapeHtml(heading)}</h3>`;
+          if (desc) h += `<p class="cta-block-desc">${escapeHtml(desc)}</p>`;
+          if (url && btn) h += `<a href="${escapeAttr(url)}" class="cta-btn">${escapeHtml(btn)}</a>`;
+          return h ? `<div class="content-block content-block--cta">${h}</div>` : '';
         }
-        const base = 'content-block content-block--' + typeClass;
-        const full = fullWidth ? ' content-block--full' : '';
-        return html ? `<div class="${base}${full}">${html}</div>` : '';
+        if (ct === RICH_BLOCK_TYPE) {
+          const rich = unwrap(f.richText) || unwrap(f.rich_text) || unwrap(f.body) || unwrap(f.content);
+          const img = unwrap(f.image);
+          const cap = unwrap(f.caption) || '';
+          const fullWidth = unwrap(f.fullWidth) || unwrap(f.full_width);
+          const blockType = unwrap(f.blockType) || unwrap(f.block_type);
+          const typeClass = blockTypeClass(blockType);
+          let html = '';
+          if (rich && rich.content && Array.isArray(rich.content) && rich.content.length) html = richTextToHtml(rich, includes);
+          if (img && img.sys && img.sys.id) {
+            const a = resolveAsset(img.sys.id, includes);
+            const u = assetUrl(a);
+            if (u) html += `<figure class="content-block-figure"><img src="${u}" alt="${escapeAttr(cap)}" loading="lazy" />${cap ? `<figcaption>${escapeHtml(cap)}</figcaption>` : ''}</figure>`;
+          }
+          const base = 'content-block content-block--' + typeClass;
+          const full = fullWidth ? ' content-block--full' : '';
+          return html ? `<div class="${base}${full}">${html}</div>` : '';
+        }
+        return '';
       },
     },
   };
@@ -90,28 +116,42 @@ function richTextToHtml(doc, includes = {}) {
   }
 }
 
-function blockTypeClass(blockType) {
-  if (!blockType || typeof blockType !== 'string') return 'text';
-  const t = blockType.toLowerCase().replace(/\s+/g, '-');
-  return ['text', 'image', 'quote', 'list', 'code'].includes(t) ? t : 'text';
-}
-
-function buildBodyFromContentBlocks(blockRefs, includes) {
+function buildBodyFromContentBlocks(blockRefs, includes, items = []) {
   if (!Array.isArray(blockRefs)) return '';
-  const ids = blockRefs.map((r) => (r && r.sys && r.sys.id) || null).filter(Boolean);
   const parts = [];
-  for (const id of ids) {
-    const entry = resolveEntry(id, includes);
+  for (let i = 0; i < blockRefs.length; i++) {
+    const r = blockRefs[i];
+    const id = r && r.sys && r.sys.id ? r.sys.id : null;
+    if (!id) continue;
+    const isResolved = r.fields && r.sys && r.sys.type === 'Entry';
+    const entry = isResolved ? r : resolveEntry(id, includes, items);
     if (!entry || !entry.fields) continue;
+    const ct = entry.sys?.contentType?.sys?.id;
     const f = entry.fields;
-    const rich = unwrap(f.richText) || unwrap(f.rich_text);
+
+    if (ct === CTA_TYPE) {
+      const heading = unwrap(f.heading) || '';
+      const desc = unwrap(f.description) || '';
+      const btn = unwrap(f.buttonText) || unwrap(f.button_label) || 'Learn more';
+      const url = unwrap(f.buttonUrl) || unwrap(f.button_url) || '#';
+      let h = '';
+      if (heading) h += `<h3 class="cta-block-heading">${escapeHtml(heading)}</h3>`;
+      if (desc) h += `<p class="cta-block-desc">${escapeHtml(desc)}</p>`;
+      if (url && btn) h += `<a href="${escapeAttr(url)}" class="cta-btn">${escapeHtml(btn)}</a>`;
+      if (h) parts.push(`<div class="content-block content-block--cta">${h}</div>`);
+      continue;
+    }
+
+    if (ct !== RICH_BLOCK_TYPE) continue;
+
+    const rich = unwrap(f.richText) || unwrap(f.rich_text) || unwrap(f.body) || unwrap(f.content);
     const img = unwrap(f.image);
     const caption = unwrap(f.caption) || '';
     const fullWidth = unwrap(f.fullWidth) || unwrap(f.full_width);
     const blockType = unwrap(f.blockType) || unwrap(f.block_type);
     const typeClass = blockTypeClass(blockType);
     let html = '';
-    if (rich && rich.content && Array.isArray(rich.content)) html = richTextToHtml(rich, includes);
+    if (rich && rich.content && Array.isArray(rich.content) && rich.content.length) html = richTextToHtml(rich, includes);
     if (img && img.sys && img.sys.id) {
       const asset = resolveAsset(img.sys.id, includes);
       const u = assetUrl(asset);
