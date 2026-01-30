@@ -219,8 +219,21 @@ ${footer()}
     const slug = unwrap(f.slug) || it.sys?.id || 'post';
     const title = unwrap(f.title) || 'Untitled';
     const subtitle = unwrap(f.subtitle) || '';
-    const contentRich = unwrap(f.content);
+    const contentFieldIds = (process.env.CONTENTFUL_CONTENT_FIELD || 'content,body,mainContent,main_content').split(',').map((s) => s.trim()).filter(Boolean);
+    let contentRich = null;
+    for (const fid of contentFieldIds) {
+      const val = unwrap(f[fid]);
+      if (val && typeof val === 'object' && (val.nodeType === 'document' || Array.isArray(val.content))) {
+        contentRich = val;
+        break;
+      }
+    }
     const body = contentRich && contentRich.content ? richTextToHtml(contentRich, includes) : '';
+
+    if (process.env.CONTENTFUL_DEBUG && !body) {
+      const fieldKeys = Object.keys(f);
+      console.warn(`[Contentful] Blog "${title}" (${slug}): no content rendered. Fields on entry: ${fieldKeys.join(', ')}. Check that "content" (or body/mainContent) Rich Text has content and is published.`);
+    }
 
     const seoEntry = resolveSeoRef(it, includes, apiItems);
     const seo = getSeo(seoEntry);
@@ -241,7 +254,15 @@ ${footer()}
     const publishedDateFormatted = formatPublishedDate(publishedDateRaw);
     const publishedDateHtml = publishedDateFormatted ? `<time class="blog-published-date" datetime="${escapeAttr(publishedDateRaw)}">${escapeHtml(publishedDateFormatted)}</time>` : '';
 
-    const faqsRich = unwrap(f.faqs);
+    const faqsFieldIds = (process.env.CONTENTFUL_FAQS_FIELD || 'faqs').split(',').map((s) => s.trim()).filter(Boolean);
+    let faqsRich = null;
+    for (const fid of faqsFieldIds) {
+      const val = unwrap(f[fid]);
+      if (val && val.content && Array.isArray(val.content) && val.content.length > 0) {
+        faqsRich = val;
+        break;
+      }
+    }
     const faqsHtml = faqsRich && faqsRich.content && faqsRich.content.length
       ? `<section class="blog-faqs" aria-labelledby="faqs-heading"><h2 id="faqs-heading" class="faqs-heading">Frequently Asked Questions</h2><div class="faq-content blog-content">${richTextToHtml(faqsRich, includes)}</div></section>`
       : '';
@@ -425,8 +446,8 @@ async function main() {
 
   try {
     const [blogRes, csRes] = await Promise.all([
-      fetchContentful(`/entries?content_type=${BLOG_CT}&order=-fields.publishedDate&include=5`),
-      fetchContentful(`/entries?content_type=${CASE_STUDY_CT}&order=-sys.updatedAt&include=5`).catch(() => ({ items: [], includes: {} })),
+      fetchContentful(`/entries?content_type=${BLOG_CT}&order=-fields.publishedDate&include=5&locale=*`),
+      fetchContentful(`/entries?content_type=${CASE_STUDY_CT}&order=-sys.updatedAt&include=5&locale=*`).catch(() => ({ items: [], includes: {} })),
     ]);
     await generateBlog(blogRes);
     await generateCaseStudies(csRes);

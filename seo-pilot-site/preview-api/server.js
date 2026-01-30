@@ -84,6 +84,7 @@ app.get('/api/preview', async (req, res) => {
       content_type: BLOG_CT,
       limit: '1',
       include: '5',
+      locale: '*',
     });
     if (id) {
       q.set('sys.id', id);
@@ -120,10 +121,26 @@ app.get('/api/preview', async (req, res) => {
     const f = entry.fields;
     const title = unwrap(f.title) || 'Untitled';
     const subtitle = unwrap(f.subtitle) || '';
-    const contentRich = unwrap(f.content);
+    const contentFieldIds = (process.env.CONTENTFUL_CONTENT_FIELD || 'content,body,mainContent,main_content').split(',').map((s) => s.trim()).filter(Boolean);
+    let contentRich = null;
+    for (const fid of contentFieldIds) {
+      const val = unwrap(f[fid]);
+      if (val && typeof val === 'object' && (val.nodeType === 'document' || Array.isArray(val.content))) {
+        contentRich = val;
+        break;
+      }
+    }
     const body = contentRich && contentRich.content ? richTextToHtml(contentRich, includes) : '';
 
-    const faqsRich = unwrap(f.faqs);
+    const faqsFieldIds = (process.env.CONTENTFUL_FAQS_FIELD || 'faqs').split(',').map((s) => s.trim()).filter(Boolean);
+    let faqsRich = null;
+    for (const fid of faqsFieldIds) {
+      const val = unwrap(f[fid]);
+      if (val && val.content && Array.isArray(val.content) && val.content.length > 0) {
+        faqsRich = val;
+        break;
+      }
+    }
     const faqsHtml = faqsRich && faqsRich.content && faqsRich.content.length
       ? `<section class="blog-faqs" aria-labelledby="faqs-heading"><h2 id="faqs-heading" class="faqs-heading">Frequently Asked Questions</h2><div class="faq-content blog-content">${richTextToHtml(faqsRich, includes)}</div></section>`
       : '';
