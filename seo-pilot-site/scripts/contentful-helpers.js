@@ -48,21 +48,25 @@ function richTextToHtml(doc, includes = {}) {
         const entry = resolveEntry(id, includes);
         if (!entry || !entry.fields) return '';
         const ct = entry.sys?.contentType?.sys?.id;
-        if (ct === 'componentContentBlock') {
-          const blockType = unwrap(entry.fields.blockType);
-          const rich = unwrap(entry.fields.richText);
-          const img = unwrap(entry.fields.image);
-          const cap = unwrap(entry.fields.caption);
-          const fullWidth = unwrap(entry.fields.fullWidth);
+        const blockTypeId = process.env.CONTENTFUL_RICH_CONTENT_BLOCK_TYPE || 'richContentBlock';
+        if (ct === blockTypeId) {
+          const f = entry.fields;
+          const rich = unwrap(f.richText) || unwrap(f.rich_text);
+          const img = unwrap(f.image);
+          const cap = unwrap(f.caption) || '';
+          const fullWidth = unwrap(f.fullWidth) || unwrap(f.full_width);
+          const blockType = unwrap(f.blockType) || unwrap(f.block_type);
+          const typeClass = blockTypeClass(blockType);
           let html = '';
-          if (rich && rich.content) html = richTextToHtml(rich, includes);
-          if (img) {
-            const a = resolveAsset(img.sys?.id, includes);
+          if (rich && rich.content && Array.isArray(rich.content)) html = richTextToHtml(rich, includes);
+          if (img && img.sys && img.sys.id) {
+            const a = resolveAsset(img.sys.id, includes);
             const u = assetUrl(a);
-            if (u) html += `<figure><img src="${u}" alt="${escapeAttr(cap || '')}" loading="lazy" />${cap ? `<figcaption>${escapeHtml(cap)}</figcaption>` : ''}</figure>`;
+            if (u) html += `<figure class="content-block-figure"><img src="${u}" alt="${escapeAttr(cap)}" loading="lazy" />${cap ? `<figcaption>${escapeHtml(cap)}</figcaption>` : ''}</figure>`;
           }
-          const cls = fullWidth ? ' content-block content-block--full' : ' content-block';
-          return html ? `<div class="${cls}">${html}</div>` : '';
+          const base = 'content-block content-block--' + typeClass;
+          const full = fullWidth ? ' content-block--full' : '';
+          return html ? `<div class="${base}${full}">${html}</div>` : '';
         }
         return '';
       },
@@ -92,32 +96,47 @@ function escapeAttr(s) {
     .replace(/'/g, '&#39;');
 }
 
+/** Normalize block type for CSS class (text, image, quote, list, code). */
+function blockTypeClass(blockType) {
+  if (!blockType || typeof blockType !== 'string') return 'text';
+  const t = blockType.toLowerCase().replace(/\s+/g, '-');
+  return ['text', 'image', 'quote', 'list', 'code'].includes(t) ? t : 'text';
+}
+
 /**
  * Build HTML body from Page – Blog Post content blocks (references).
  * includes: { Entry: [], Asset: [] }
+ * Supports field IDs: richText/rich_text, image, caption, fullWidth/full_width, blockType/block_type.
  */
 function buildBodyFromContentBlocks(blockRefs, includes) {
   if (!Array.isArray(blockRefs)) return '';
-  const ids = blockRefs.map((r) => (r && r.sys && r.sys.id) || (r && r.sys && r.sys.type === 'Link' ? r.sys.id : null)).filter(Boolean);
+  const ids = blockRefs.map((r) => (r && r.sys && r.sys.id) || null).filter(Boolean);
   const parts = [];
   for (const id of ids) {
     const entry = resolveEntry(id, includes);
     if (!entry || !entry.fields) continue;
-    const rich = unwrap(entry.fields.richText);
-    const img = unwrap(entry.fields.image);
-    const caption = unwrap(entry.fields.caption);
-    const fullWidth = unwrap(entry.fields.fullWidth);
+    const f = entry.fields;
+    const rich = unwrap(f.richText) || unwrap(f.rich_text);
+    const img = unwrap(f.image);
+    const caption = unwrap(f.caption) || '';
+    const fullWidth = unwrap(f.fullWidth) || unwrap(f.full_width);
+    const blockType = unwrap(f.blockType) || unwrap(f.block_type);
+    const typeClass = blockTypeClass(blockType);
     let html = '';
-    if (rich && rich.content) html = richTextToHtml(rich, includes);
-    if (img) {
-      const assetId = img.sys && img.sys.id;
-      const asset = assetId ? resolveAsset(assetId, includes) : null;
+    if (rich && rich.content && Array.isArray(rich.content)) {
+      html = richTextToHtml(rich, includes);
+    }
+    if (img && img.sys && img.sys.id) {
+      const asset = resolveAsset(img.sys.id, includes);
       const u = assetUrl(asset);
-      if (u) html += `<figure><img src="${u}" alt="${escapeAttr(caption || '')}" loading="lazy" />${caption ? `<figcaption>${escapeHtml(caption)}</figcaption>` : ''}</figure>`;
+      if (u) {
+        html += `<figure class="content-block-figure"><img src="${u}" alt="${escapeAttr(caption)}" loading="lazy" />${caption ? `<figcaption>${escapeHtml(caption)}</figcaption>` : ''}</figure>`;
+      }
     }
     if (html) {
-      const cls = fullWidth ? ' content-block content-block--full' : ' content-block';
-      parts.push(`<div class="${cls}">${html}</div>`);
+      const base = 'content-block content-block--' + typeClass;
+      const full = fullWidth ? ' content-block--full' : '';
+      parts.push(`<div class="${base}${full}">${html}</div>`);
     }
   }
   return parts.join('\n');
@@ -173,6 +192,7 @@ module.exports = {
   richTextToHtml,
   escapeHtml,
   escapeAttr,
+  blockTypeClass,
   buildBodyFromContentBlocks,
   getSeo,
   buildResultsFromResultBlocks,

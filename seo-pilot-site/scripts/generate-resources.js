@@ -17,7 +17,7 @@ const ROOT = path.resolve(__dirname, '..');
 const BASE = 'https://theseopilot.pro';
 
 const BLOG_CT = process.env.CONTENTFUL_BLOG_CONTENT_TYPE || 'pageBlogPost';
-const CASE_STUDY_CT = process.env.CONTENTFUL_CASE_STUDY_CONTENT_TYPE || 'pageCaseStudy';
+const CASE_STUDY_CT = process.env.CONTENTFUL_CASE_STUDY_CONTENT_TYPE || 'caseStudyPage';
 
 const {
   unwrap,
@@ -206,7 +206,7 @@ ${footer()}
     const slug = unwrap(f.slug) || it.sys?.id || 'post';
     const title = unwrap(f.title) || 'Untitled';
     const subtitle = unwrap(f.subtitle) || '';
-    const blocks = unwrap(f.contentBlocks) || [];
+    const blocks = unwrap(f.contentBlocks) || unwrap(f.content_blocks) || [];
     const body = buildBodyFromContentBlocks(blocks, includes);
 
     const seoEntry = resolveSeoRef(it, includes);
@@ -224,15 +224,15 @@ ${baseHead(seoTitle + ' | TheSEOPilot', seoDescription, canonical)}
 <body>
 ${gtmBody()}
 ${header()}
-  <main class="case-study-page">
+  <main class="case-study-page blog-post-page">
     <nav class="breadcrumb" aria-label="Breadcrumb">
       <a href="/">Home</a> / <a href="/resources/">Resources</a> / <a href="/resources/blog/">Blog</a> / ${escapeHtml(title)}
     </nav>
-    <div class="container" style="padding-top:1rem;">
-      <h1 style="margin-bottom:0.5rem;">${escapeHtml(title)}</h1>
-      ${subtitle ? `<p style="color:var(--muted);margin-bottom:1.5rem;">${escapeHtml(subtitle)}</p>` : ''}
-      <div class="legal-page">
-        ${body || '<p>No content yet.</p>'}
+    <div class="container blog-post-container">
+      <h1 class="blog-post-title">${escapeHtml(title)}</h1>
+      ${subtitle ? `<p class="blog-post-subtitle">${escapeHtml(subtitle)}</p>` : ''}
+      <div class="legal-page blog-content-wrapper">
+        <div class="blog-content">${body || '<p class="blog-content-empty">No content yet.</p>'}</div>
       </div>
     </div>
   </main>
@@ -386,8 +386,8 @@ async function main() {
 
   try {
     const [blogRes, csRes] = await Promise.all([
-      fetchContentful(`/entries?content_type=${BLOG_CT}&order=-fields.publishedDate&include=2`),
-      fetchContentful(`/entries?content_type=${CASE_STUDY_CT}&order=-sys.updatedAt&include=2`).catch(() => ({ items: [], includes: {} })),
+      fetchContentful(`/entries?content_type=${BLOG_CT}&order=-fields.publishedDate&include=3`),
+      fetchContentful(`/entries?content_type=${CASE_STUDY_CT}&order=-sys.updatedAt&include=3`).catch(() => ({ items: [], includes: {} })),
     ]);
     await generateBlog(blogRes);
     await generateCaseStudies(csRes);

@@ -4,12 +4,18 @@ This project uses the **composition** architecture: pages reference reusable com
 
 ## 1. Content type IDs (API identifiers)
 
-In **Content model**, each content type has an **API identifier**. The code defaults to:
+In **Content model**, each content type has an **API identifier**. The code uses these defaults (override via env; see `.env.example`):
 
-- **Page – Blog Post:** `pageBlogPost` (override: `CONTENTFUL_BLOG_CONTENT_TYPE`)
-- **Page – Case Study:** `pageCaseStudy` (override: `CONTENTFUL_CASE_STUDY_CONTENT_TYPE`)
-
-If your IDs differ (e.g. `pageBlogPost`, `page-blog-post`), set them in `.env` or Render **Environment**.
+| Model | API ID | Env override |
+|-------|--------|--------------|
+| Page – Blog Post | `pageBlogPost` | `CONTENTFUL_BLOG_CONTENT_TYPE` |
+| Page – Case Study | `caseStudyPage` | `CONTENTFUL_CASE_STUDY_CONTENT_TYPE` |
+| Rich Content Block | `richContentBlock` | `CONTENTFUL_RICH_CONTENT_BLOCK_TYPE` |
+| Result Block Component | `resultBlockComponent` | `CONTENTFUL_RESULT_BLOCK_TYPE` |
+| Component – SEO | `seoComponent` | `CONTENTFUL_SEO_COMPONENT_TYPE` |
+| Component – Author | `authorComponent` | `CONTENTFUL_AUTHOR_TYPE` |
+| CTA Block | `ctaBlock` | `CONTENTFUL_CTA_BLOCK_TYPE` |
+| Landing Page | `landingPage` | `CONTENTFUL_LANDING_PAGE_TYPE` |
 
 ## 2. Page – Blog Post
 
@@ -50,7 +56,7 @@ The **Aspora** case study is static at `/resources/case-studies/aspora-ai-visibi
 
 ## 4. Component – SEO
 
-Referenced by every page. Suggested API ID: `componentSeo`.
+Referenced by every page. API ID: `seoComponent`.
 
 | Field | Type | API ID (example) |
 |-------|------|------------------|
@@ -63,19 +69,21 @@ Referenced by every page. Suggested API ID: `componentSeo`.
 
 ## 5. Component – Content Block
 
-Used in **Content blocks** (Page – Blog Post). Suggested API ID: `componentContentBlock`.
+Used in **Content blocks** (Page – Blog Post). API ID: `richContentBlock`. The generator also accepts `rich_text`, `block_type`, `full_width`, and `content_blocks` as field IDs.
 
 | Field | Type | API ID (example) |
 |-------|------|------------------|
-| Block type | Dropdown (text, image, quote, list, code) | `blockType` |
+| Block type | Dropdown: **text**, **image**, **quote**, **list**, **code** | `blockType` |
 | Rich text | Rich text | `richText` |
 | Image | Media | `image` |
 | Caption | Short text | `caption` |
 | Full width | Boolean | `fullWidth` |
 
+Block type values map to CSS classes (e.g. `content-block--text`, `content-block--quote`) for styling.
+
 ## 6. Component – Result Block
 
-Used in **Results blocks** (Page – Case Study). Suggested API ID: `componentResultBlock`.
+Used in **Results blocks** (Page – Case Study). API ID: `resultBlockComponent`.
 
 | Field | Type | API ID (example) |
 |-------|------|------------------|
@@ -90,9 +98,11 @@ Used in **Results blocks** (Page – Case Study). Suggested API ID: `componentRe
 CONTENTFUL_SPACE_ID=...
 CONTENTFUL_ACCESS_TOKEN=...       # Delivery API (generate)
 CONTENTFUL_PREVIEW_TOKEN=...     # Preview API (blog preview only)
-# Optional:
-CONTENTFUL_BLOG_CONTENT_TYPE=pageBlogPost
-CONTENTFUL_CASE_STUDY_CONTENT_TYPE=pageCaseStudy
+# Optional overrides (see .env.example for all content model API IDs):
+# CONTENTFUL_BLOG_CONTENT_TYPE=pageBlogPost
+# CONTENTFUL_CASE_STUDY_CONTENT_TYPE=caseStudyPage
+# CONTENTFUL_RICH_CONTENT_BLOCK_TYPE=richContentBlock
+# ... etc.
 ```
 
 - **Static site / generate:** `CONTENTFUL_SPACE_ID`, `CONTENTFUL_ACCESS_TOKEN`

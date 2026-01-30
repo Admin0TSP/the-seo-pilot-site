@@ -71,7 +71,7 @@ app.get('/api/preview', async (req, res) => {
     const q = new URLSearchParams({
       content_type: BLOG_CT,
       limit: '1',
-      include: '2',
+      include: '3',
     });
     if (id) {
       q.set('sys.id', id);
@@ -108,7 +108,7 @@ app.get('/api/preview', async (req, res) => {
     const f = entry.fields;
     const title = unwrap(f.title) || 'Untitled';
     const subtitle = unwrap(f.subtitle) || '';
-    const contentBlocks = unwrap(f.contentBlocks) || [];
+    const contentBlocks = unwrap(f.contentBlocks) || unwrap(f.content_blocks) || [];
     const body = buildBodyFromContentBlocks(contentBlocks, includes);
 
     const seoEntry = resolveSeoRef(entry, includes);

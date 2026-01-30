@@ -52,11 +52,11 @@
     </div>
   </header>
 
-  <main class="case-study-page">
+  <main class="case-study-page blog-post-page">
     <nav class="breadcrumb" aria-label="Breadcrumb">
       <a href="/">Home</a> / <a href="/resources/">Resources</a> / <a href="/resources/blog/">Blog</a> / Preview
     </nav>
-    <div class="container" style="padding-top: 1rem;">
+    <div class="container blog-post-container">
       <p style="margin-bottom: 1rem; color: var(--muted); font-size: 0.95rem;">
         <strong>Preview mode</strong> — Draft content from Contentful. This page is not indexed.
       </p>
@@ -112,9 +112,11 @@
       function render(post) {
         statusEl.style.display = 'none';
         contentEl.style.display = 'block';
+        var sub = (post.excerpt || post.subtitle || '');
         contentEl.innerHTML =
-          '<h1 style="margin-bottom: 1rem;">' + escapeHtml(post.title) + '</h1>' +
-          '<div class="legal-page">' + (post.body || '') + '</div>';
+          '<h1 class="blog-post-title">' + escapeHtml(post.title) + '</h1>' +
+          (sub ? '<p class="blog-post-subtitle">' + escapeHtml(sub) + '</p>' : '') +
+          '<div class="legal-page blog-content-wrapper"><div class="blog-content">' + (post.body || '') + '</div></div>';
         document.title = (post.seoTitle || post.title) + ' — Preview | TheSEOPilot';
         var desc = document.querySelector('meta[name="description"]');
         if (!desc) {
