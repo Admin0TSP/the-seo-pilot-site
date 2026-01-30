@@ -15,6 +15,7 @@ In **Content model**, each content type has an **API identifier**. The code uses
 | Component – SEO | `seoComponent` | `CONTENTFUL_SEO_COMPONENT_TYPE` |
 | Component – Author | `authorComponent` | `CONTENTFUL_AUTHOR_TYPE` |
 | CTA Block | `ctaBlock` | `CONTENTFUL_CTA_BLOCK_TYPE` |
+| Component – FAQ | `componentFaq` | `CONTENTFUL_FAQ_COMPONENT_TYPE` |
 | Landing Page | `landingPage` | `CONTENTFUL_LANDING_PAGE_TYPE` |
 
 ## 2. Page – Blog Post
@@ -30,6 +31,7 @@ In **Content model**, each content type has an **API identifier**. The code uses
 | Featured image | Media | ❌ | `featuredImage` |
 | Content blocks | Reference (many) → Rich Content Block, CTA Block | ✓ | `contentBlocks` (or `content_blocks`, `blocks`, `sections`) |
 | Related blog posts | Reference (many) | ❌ | `relatedBlogPosts` |
+| FAQs | Reference (many) → **Component – FAQ** | ❌ | `faqs` |
 | SEO fields | Reference → **Component – SEO** | ✓ | `seoFields` or `seo` |
 
 **URLs:** `/resources/blog/{slug}/`
@@ -92,7 +94,16 @@ Used in **Results blocks** (Page – Case Study). API ID: `resultBlockComponent`
 | Graph image | Media | `graphImage` |
 | Description | Long text | `description` |
 
-## 7. Environment variables
+## 7. Component – FAQ
+
+Used in **FAQs** (Page – Blog Post). API ID: `componentFaq`. Renders a styled FAQ section with JSON-LD FAQPage schema for SEO.
+
+| Field | Type | API ID (example) |
+|-------|------|------------------|
+| Question | Short text | `question` |
+| Answer | Rich text or Long text | `answer` |
+
+## 8. Environment variables
 
 ```bash
 CONTENTFUL_SPACE_ID=...
@@ -108,7 +119,7 @@ CONTENTFUL_PREVIEW_TOKEN=...     # Preview API (blog preview only)
 - **Static site / generate:** `CONTENTFUL_SPACE_ID`, `CONTENTFUL_ACCESS_TOKEN`
 - **Preview API** (Render Web Service): `CONTENTFUL_SPACE_ID`, `CONTENTFUL_PREVIEW_TOKEN`
 
-## 8. Generate
+## 9. Generate
 
 ```bash
 npm install
@@ -120,7 +131,7 @@ npm run generate
 - Outputs `resources/blog/index.html`, `resources/blog/{slug}/index.html`, `resources/case-studies/index.html`, `resources/case-studies/{slug}/index.html`.
 - If env is missing, the script skips without changing files.
 
-## 9. Blog preview
+## 10. Blog preview
 
 1. Deploy the **Preview API** (`preview-api/`) as a Render Web Service.
 2. **Contentful → Settings → Content preview:** set Preview URL for **Page – Blog Post** to  
@@ -129,6 +140,6 @@ npm run generate
 
 See **docs/PREVIEW-SETUP.md**.
 
-## 10. Aspora graph
+## 11. Aspora graph
 
 Add the GSC growth graph as `assets/img/case-studies/aspora-gsc-growth.png`. See `assets/img/case-studies/README.md`.

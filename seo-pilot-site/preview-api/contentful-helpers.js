@@ -178,6 +178,80 @@ function getSeo(seoEntry) {
   };
 }
 
+function formatPublishedDate(isoDate) {
+  if (!isoDate || typeof isoDate !== 'string') return '';
+  try {
+    const d = new Date(isoDate);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  } catch (_) {
+    return '';
+  }
+}
+
+function getFeaturedImageUrl(entry, includes) {
+  if (!entry || !entry.fields) return '';
+  const img = unwrap(entry.fields.featuredImage) || unwrap(entry.fields.featured_image);
+  if (!img || !img.sys || !img.sys.id) return '';
+  const asset = resolveAsset(img.sys.id, includes);
+  return assetUrl(asset);
+}
+
+function stripHtml(html) {
+  if (!html || typeof html !== 'string') return '';
+  return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+const FAQ_TYPE = process.env.CONTENTFUL_FAQ_COMPONENT_TYPE || 'componentFaq';
+
+function getAuthor(authorEntry, includes = {}) {
+  if (!authorEntry || !authorEntry.fields) return null;
+  const f = authorEntry.fields;
+  const name = unwrap(f.name);
+  if (!name) return null;
+  const avatar = unwrap(f.avatar);
+  let avatarUrl = '';
+  if (avatar && avatar.sys && avatar.sys.id) {
+    const asset = resolveAsset(avatar.sys.id, includes);
+    avatarUrl = assetUrl(asset);
+  }
+  return {
+    name,
+    avatarUrl: avatarUrl ? (avatarUrl.startsWith('//') ? 'https:' + avatarUrl : avatarUrl) : '',
+    bio: unwrap(f.bio) || '',
+    roleCompany: unwrap(f.roleCompany) || unwrap(f.role_company) || '',
+  };
+}
+
+function buildFaqsHtml(faqRefs, includes, items = []) {
+  if (!Array.isArray(faqRefs)) return { html: '', items: [] };
+  const ids = faqRefs.map((r) => (r && r.sys && r.sys.id) || null).filter(Boolean);
+  const parts = [];
+  const schemaItems = [];
+  for (const id of ids) {
+    const entry = resolveEntry(id, includes, items);
+    if (!entry || !entry.fields) continue;
+    const f = entry.fields;
+    const question = unwrap(f.question) || unwrap(f.question_text) || '';
+    if (!question) continue;
+    let answerHtml = '';
+    let answerText = '';
+    const answerVal = unwrap(f.answer);
+    if (answerVal && typeof answerVal === 'object' && answerVal.content && Array.isArray(answerVal.content) && answerVal.content.length) {
+      answerHtml = richTextToHtml(answerVal, includes);
+      answerText = stripHtml(answerHtml);
+    } else if (typeof answerVal === 'string') {
+      answerHtml = escapeHtml(answerVal).replace(/\n/g, '<br />');
+      answerText = answerVal;
+    }
+    if (!answerHtml && !answerText) continue;
+    parts.push(`<div class="faq-item"><h3 class="faq-question">${escapeHtml(question)}</h3><div class="faq-answer">${answerHtml || escapeHtml(answerText)}</div></div>`);
+    schemaItems.push({ question, answer: answerText || stripHtml(answerHtml) });
+  }
+  const html = parts.length ? `<section class="blog-faqs" aria-labelledby="faqs-heading"><h2 id="faqs-heading" class="faqs-heading">Frequently Asked Questions</h2><div class="faq-list">${parts.join('\n')}</div></section>` : '';
+  return { html, items: schemaItems };
+}
+
 module.exports = {
   unwrap,
   resolveEntry,

@@ -113,10 +113,22 @@
         statusEl.style.display = 'none';
         contentEl.style.display = 'block';
         var sub = (post.excerpt || post.subtitle || '');
+        var featuredImg = post.featuredImageUrl
+          ? '<figure class="blog-featured-image"><img src="' + escapeAttr(post.featuredImageUrl) + '" alt="' + escapeAttr(post.title) + '" loading="eager" /></figure>'
+          : '';
+        var metaParts = [];
+        if (post.publishedDateFormatted) {
+          metaParts.push('<time class="blog-published-date" datetime="' + escapeAttr(post.publishDate || '') + '">' + escapeHtml(post.publishedDateFormatted) + '</time>');
+        }
+        if (post.authorHtml) metaParts.push(post.authorHtml);
+        var metaRow = metaParts.length ? '<div class="blog-meta-row">' + metaParts.join('') + '</div>' : '';
         contentEl.innerHTML =
           '<h1 class="blog-post-title">' + escapeHtml(post.title) + '</h1>' +
           (sub ? '<p class="blog-post-subtitle">' + escapeHtml(sub) + '</p>' : '') +
-          '<div class="legal-page blog-content-wrapper"><div class="blog-content">' + (post.body || '') + '</div></div>';
+          featuredImg +
+          metaRow +
+          '<div class="legal-page blog-content-wrapper"><div class="blog-content">' + (post.body || '') + '</div></div>' +
+          (post.faqsHtml || '');
         document.title = (post.seoTitle || post.title) + ' — Preview | TheSEOPilot';
         var desc = document.querySelector('meta[name="description"]');
         if (!desc) {
@@ -132,6 +144,11 @@
         var d = document.createElement('div');
         d.textContent = s;
         return d.innerHTML;
+      }
+
+      function escapeAttr(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
       }
 
       function looksLikeToken(s) {

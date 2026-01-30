@@ -29,6 +29,9 @@ const {
   buildBodyFromContentBlocks,
   getSeo,
   getAuthor,
+  getFeaturedImageUrl,
+  formatPublishedDate,
+  buildFaqsHtml,
   buildResultsFromResultBlocks,
   richTextToHtml,
 } = require('./contentful-helpers');
@@ -118,7 +121,11 @@ function gtmBody() {
   <!-- End Google Tag Manager (noscript) -->`;
 }
 
-function baseHead(title, description, canonical) {
+function baseHead(title, description, canonical, opts = {}) {
+  const ogImage = opts.ogImage ? `  <meta property="og:image" content="${escapeAttr(opts.ogImage)}" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="${escapeAttr(opts.ogImage)}" />` : '';
+  const schemaJson = opts.schemaJson ? `  <script type="application/ld+json">${opts.schemaJson}</script>` : '';
   return `  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${escapeHtml(title)}</title>
@@ -126,7 +133,7 @@ function baseHead(title, description, canonical) {
   <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="/style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
-  <link rel="canonical" href="${escapeHtml(canonical)}" />
+  <link rel="canonical" href="${escapeHtml(canonical)}" />${ogImage ? '\n' + ogImage : ''}${schemaJson ? '\n' + schemaJson : ''}
   <script defer src="/script.js"></script>`;
 }
 
@@ -231,11 +238,39 @@ ${footer()}
       ? `<div class="blog-author"><div class="blog-author-inner">${author.avatarUrl ? `<img src="${escapeAttr(author.avatarUrl)}" alt="" class="blog-author-avatar" loading="lazy" />` : ''}<div><span class="blog-author-name">${escapeHtml(author.name)}</span>${author.roleCompany ? `<span class="blog-author-role">${escapeHtml(author.roleCompany)}</span>` : ''}${author.bio ? `<p class="blog-author-bio">${escapeHtml(author.bio)}</p>` : ''}</div></div></div>`
       : '';
 
+    const featuredImageUrl = getFeaturedImageUrl(it, includes);
+    const featuredImageAbsolute = featuredImageUrl ? (featuredImageUrl.startsWith('//') ? 'https:' + featuredImageUrl : featuredImageUrl) : '';
+
+    const publishedDateRaw = unwrap(f.publishedDate) || '';
+    const publishedDateFormatted = formatPublishedDate(publishedDateRaw);
+    const publishedDateHtml = publishedDateFormatted ? `<time class="blog-published-date" datetime="${escapeAttr(publishedDateRaw)}">${escapeHtml(publishedDateFormatted)}</time>` : '';
+
+    const faqsRefs = unwrap(f.faqs) || [];
+    const { html: faqsHtml, items: faqSchemaItems } = buildFaqsHtml(faqsRefs, includes, apiItems);
+
+    const faqSchemaJson = faqSchemaItems.length > 0
+      ? JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: faqSchemaItems.map(({ question, answer }) => ({
+            '@type': 'Question',
+            name: question,
+            acceptedAnswer: { '@type': 'Answer', text: answer },
+          })),
+        })
+      : '';
+
+    const headOpts = {};
+    if (featuredImageAbsolute) headOpts.ogImage = featuredImageAbsolute;
+    if (faqSchemaJson) headOpts.schemaJson = faqSchemaJson;
+
+    const metaRow = [publishedDateHtml, authorHtml].filter(Boolean).join('');
+
     const postHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
 ${gtmHead()}
-${baseHead(seoTitle + ' | TheSEOPilot', seoDescription, canonical)}
+${baseHead(seoTitle + ' | TheSEOPilot', seoDescription, canonical, headOpts)}
 </head>
 <body>
 ${gtmBody()}
@@ -247,10 +282,12 @@ ${header()}
     <div class="container blog-post-container">
       <h1 class="blog-post-title">${escapeHtml(title)}</h1>
       ${subtitle ? `<p class="blog-post-subtitle">${escapeHtml(subtitle)}</p>` : ''}
-      ${authorHtml}
+      ${featuredImageAbsolute ? `<figure class="blog-featured-image"><img src="${escapeAttr(featuredImageAbsolute)}" alt="${escapeAttr(title)}" loading="eager" /></figure>` : ''}
+      <div class="blog-meta-row">${metaRow}</div>
       <div class="legal-page blog-content-wrapper">
         <div class="blog-content">${body || '<p class="blog-content-empty">No content yet.</p>'}</div>
       </div>
+      ${faqsHtml}
     </div>
   </main>
 ${footer()}

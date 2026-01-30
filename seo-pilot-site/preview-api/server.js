@@ -14,6 +14,12 @@ const {
   resolveEntry,
   buildBodyFromContentBlocks,
   getSeo,
+  getAuthor,
+  getFeaturedImageUrl,
+  formatPublishedDate,
+  buildFaqsHtml,
+  escapeHtml,
+  escapeAttr,
 } = require('./contentful-helpers');
 
 const app = express();
@@ -41,6 +47,13 @@ app.use(cors({
   },
 }));
 app.use(express.json());
+
+function resolveAuthorRef(entry, includes, items = []) {
+  const f = entry.fields || {};
+  const ref = unwrap(f.author);
+  const id = ref && ref.sys && ref.sys.id;
+  return id ? resolveEntry(id, includes, items) : null;
+}
 
 function resolveSeoRef(entry, includes, items = []) {
   const f = entry.fields || {};
@@ -111,10 +124,25 @@ app.get('/api/preview', async (req, res) => {
     const contentBlocks = unwrap(f.contentBlocks) || unwrap(f.content_blocks) || unwrap(f.blocks) || unwrap(f.sections) || [];
     const body = buildBodyFromContentBlocks(contentBlocks, includes, items);
 
+    const faqsRefs = unwrap(f.faqs) || [];
+    const { html: faqsHtml } = buildFaqsHtml(faqsRefs, includes, items);
+
+    const featuredImageUrl = getFeaturedImageUrl(entry, includes);
+    const featuredImageAbsolute = featuredImageUrl ? (featuredImageUrl.startsWith('//') ? 'https:' + featuredImageUrl : featuredImageUrl) : '';
+
+    const publishedDateRaw = unwrap(f.publishedDate) || '';
+    const publishedDateFormatted = formatPublishedDate(publishedDateRaw);
+
     const seoEntry = resolveSeoRef(entry, includes, items);
     const seo = getSeo(seoEntry);
     const seoTitle = seo.pageTitle || title;
     const seoDescription = seo.pageDescription || subtitle;
+
+    const authorEntry = resolveAuthorRef(entry, includes, items);
+    const author = getAuthor(authorEntry, includes);
+    const authorHtml = author
+      ? `<div class="blog-author"><div class="blog-author-inner">${author.avatarUrl ? `<img src="${escapeAttr(author.avatarUrl)}" alt="" class="blog-author-avatar" loading="lazy" />` : ''}<div><span class="blog-author-name">${escapeHtml(author.name)}</span>${author.roleCompany ? `<span class="blog-author-role">${escapeHtml(author.roleCompany)}</span>` : ''}${author.bio ? `<p class="blog-author-bio">${escapeHtml(author.bio)}</p>` : ''}</div></div></div>`
+      : '';
 
     const post = {
       id: entry.sys?.id,
@@ -124,7 +152,11 @@ app.get('/api/preview', async (req, res) => {
       body: body || '',
       seoTitle,
       seoDescription,
-      publishDate: unwrap(f.publishedDate),
+      publishDate: publishedDateRaw,
+      publishedDateFormatted,
+      featuredImageUrl: featuredImageAbsolute,
+      faqsHtml: faqsHtml || '',
+      authorHtml: authorHtml || '',
     };
 
     return res.json({ ok: true, post });
