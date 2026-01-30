@@ -1,91 +1,123 @@
-# Contentful setup for Resources (blog + case studies)
+# Contentful setup (Page – Blog Post / Page – Case Study)
 
-## 1. Create a Contentful space
+This project uses the **composition** architecture: pages reference reusable components (SEO, Content Block, Result Block). Content types below must match what the generator and Preview API expect.
 
-1. Go to [Contentful](https://www.contentful.com/) and create a space.
-2. Get **Space ID** and **Content Delivery API – access token** from **Settings → API keys**.
+## 1. Content type IDs (API identifiers)
 
-## 2. Environment variables
+In **Content model**, each content type has an **API identifier**. The code defaults to:
 
-Copy `.env.example` to `.env` and set:
+- **Page – Blog Post:** `pageBlogPost` (override: `CONTENTFUL_BLOG_CONTENT_TYPE`)
+- **Page – Case Study:** `pageCaseStudy` (override: `CONTENTFUL_CASE_STUDY_CONTENT_TYPE`)
 
-```
-CONTENTFUL_SPACE_ID=your_space_id
-CONTENTFUL_ACCESS_TOKEN=your_delivery_token
-```
+If your IDs differ (e.g. `pageBlogPost`, `page-blog-post`), set them in `.env` or Render **Environment**.
 
-On **Render**, add the same vars in **Environment** for the static site.
+## 2. Page – Blog Post
 
-## 3. Content models
-
-### Blog Post (`blogPost`)
-
-| Field | Type | Required |
-|-------|------|----------|
-| `title` | Short text | ✓ |
-| `slug` | Short text | ✓ (unique, used in URL) |
-| `excerpt` | Long text | |
-| `body` or `content` | Long text (HTML) | ✓ |
-| `publishDate` | Date & time | ✓ |
-| `seoTitle` | Short text | |
-| `seoDescription` | Long text | |
+| Field | Type | Required | API ID (example) |
+|-------|------|----------|------------------|
+| Internal name | Short text | ✓ | `internalName` |
+| Slug | Short text | ✓ | `slug` |
+| Title | Short text | ✓ | `title` |
+| Subtitle | Short text | ❌ | `subtitle` |
+| Author | Reference → Author | ❌ | `author` |
+| Published date | Date | ✓ | `publishedDate` |
+| Featured image | Media | ❌ | `featuredImage` |
+| Content blocks | Reference (many) → Content Block | ✓ | `contentBlocks` |
+| Related blog posts | Reference (many) | ❌ | `relatedBlogPosts` |
+| SEO fields | Reference → **Component – SEO** | ✓ | `seoFields` or `seo` |
 
 **URLs:** `/resources/blog/{slug}/`
 
-### Case Study (`caseStudy`)
+## 3. Page – Case Study
 
-| Field | Type | Required |
-|-------|------|----------|
-| `title` | Short text | ✓ |
-| `slug` | Short text | ✓ (unique) |
-| `clientName` | Short text | |
-| `killerMetric` | Short text | (e.g. "7.49M impressions in 6 months") |
-| `challenge` | Long text | |
-| `strategy` | Long text | |
-| `results` | Long text (HTML allowed) | |
-| `whyAICites` | Long text | |
-| `graphImage1Url` | Short text | Optional. Full URL to graph image. |
-| `graphImage2Url` | Short text | Optional. |
+| Field | Type | Required | API ID (example) |
+|-------|------|----------|------------------|
+| Internal name | Short text | ✓ | `internalName` |
+| Slug | Short text | ✓ | `slug` |
+| Client name | Short text | ✓ | `clientName` |
+| Industry | Short text | ❌ | `industry` |
+| Timeframe | Short text | ❌ | `timeframe` |
+| Challenge | Long text | ✓ | `challenge` |
+| Strategy | Rich text | ✓ | `strategy` |
+| Results blocks | Reference (many) → **Result Block** | ✓ | `resultsBlocks` |
+| Key metrics | JSON / Long text | ❌ | `keyMetrics` |
+| Featured image | Media | ❌ | `featuredImage` |
+| SEO fields | Reference → **Component – SEO** | ✓ | `seoFields` or `seo` |
 
 **URLs:** `/resources/case-studies/{slug}/`
 
-The **Aspora** case study is static at `/resources/case-studies/aspora-ai-visibility/`. Add others in Contentful; the generator will create their pages and add them to the case studies listing.
+The **Aspora** case study is static at `/resources/case-studies/aspora-ai-visibility/`. Add others in Contentful; the generator will create their pages.
 
-## 4. Generate
+## 4. Component – SEO
+
+Referenced by every page. Suggested API ID: `componentSeo`.
+
+| Field | Type | API ID (example) |
+|-------|------|------------------|
+| Page title | Short text | `pageTitle` |
+| Page description | Long text | `pageDescription` |
+| Canonical URL | Short text | `canonicalUrl` |
+| noindex | Boolean | `noindex` |
+| nofollow | Boolean | `nofollow` |
+| Share images | Media (many) | `shareImages` |
+
+## 5. Component – Content Block
+
+Used in **Content blocks** (Page – Blog Post). Suggested API ID: `componentContentBlock`.
+
+| Field | Type | API ID (example) |
+|-------|------|------------------|
+| Block type | Dropdown (text, image, quote, list, code) | `blockType` |
+| Rich text | Rich text | `richText` |
+| Image | Media | `image` |
+| Caption | Short text | `caption` |
+| Full width | Boolean | `fullWidth` |
+
+## 6. Component – Result Block
+
+Used in **Results blocks** (Page – Case Study). Suggested API ID: `componentResultBlock`.
+
+| Field | Type | API ID (example) |
+|-------|------|------------------|
+| Metric label | Short text | `metricLabel` |
+| Metric value | Short text | `metricValue` |
+| Graph image | Media | `graphImage` |
+| Description | Long text | `description` |
+
+## 7. Environment variables
+
+```bash
+CONTENTFUL_SPACE_ID=...
+CONTENTFUL_ACCESS_TOKEN=...       # Delivery API (generate)
+CONTENTFUL_PREVIEW_TOKEN=...     # Preview API (blog preview only)
+# Optional:
+CONTENTFUL_BLOG_CONTENT_TYPE=pageBlogPost
+CONTENTFUL_CASE_STUDY_CONTENT_TYPE=pageCaseStudy
+```
+
+- **Static site / generate:** `CONTENTFUL_SPACE_ID`, `CONTENTFUL_ACCESS_TOKEN`
+- **Preview API** (Render Web Service): `CONTENTFUL_SPACE_ID`, `CONTENTFUL_PREVIEW_TOKEN`
+
+## 8. Generate
 
 ```bash
 npm install
 npm run generate
 ```
 
-- Reads from Contentful and overwrites:
-  - `resources/blog/index.html`
-  - `resources/blog/{slug}/index.html` for each post
-  - `resources/case-studies/index.html` (always includes Aspora + Contentful case studies)
-  - `resources/case-studies/{slug}/index.html` for each Contentful case study
-- If `.env` is missing or Contentful keys are empty, the script exits without changing anything.
+- Fetches **Page – Blog Post** and **Page – Case Study** with `include=2` (resolves SEO, content blocks, result blocks).
+- Outputs `resources/blog/index.html`, `resources/blog/{slug}/index.html`, `resources/case-studies/index.html`, `resources/case-studies/{slug}/index.html`.
+- If env is missing, the script skips without changing files.
 
-## 5. Render build
+## 9. Blog preview
 
-Build command is `npm install && npm run generate`. Ensure `CONTENTFUL_SPACE_ID` and `CONTENTFUL_ACCESS_TOKEN` are set in Render **Environment**.
-
-## 6. Blog preview (Contentful)
-
-To preview **draft** blog posts on your site:
-
-1. Deploy the **Preview API** (`preview-api/`) as a separate Render Web Service.
-2. Set **Contentful → Settings → Content preview** → Preview URL:
+1. Deploy the **Preview API** (`preview-api/`) as a Render Web Service.
+2. **Contentful → Settings → Content preview:** set Preview URL for **Page – Blog Post** to  
    `https://www.theseopilot.pro/blog-preview?slug={{entry.fields.slug}}`
-3. Configure `blog-preview/config.js` with your Preview API base URL.
+3. Set `window.PREVIEW_API_BASE` in `blog-preview/config.js` to your Preview API URL.
 
-See **docs/PREVIEW-SETUP.md** for full steps.
+See **docs/PREVIEW-SETUP.md**.
 
-## 7. Aspora graph image
+## 10. Aspora graph
 
-Add the GSC growth graph as:
-
-```
-assets/img/case-studies/aspora-gsc-growth.png
-```
-
-See `assets/img/case-studies/README.md`.
+Add the GSC growth graph as `assets/img/case-studies/aspora-gsc-growth.png`. See `assets/img/case-studies/README.md`.

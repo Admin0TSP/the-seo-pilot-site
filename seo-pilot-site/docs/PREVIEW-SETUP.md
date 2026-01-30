@@ -9,7 +9,7 @@ This guide configures **Contentful Content Preview** for blog posts so editors c
 3. Use:
    - **Name:** `TSP Blog Preview`
    - **Description:** (optional) e.g. *Preview blog posts on theseopilot.pro*
-   - **Preview URL for Page - Blog Post** (or your blog content type):
+   - **Preview URL for Page – Blog Post** (model **Page – Blog Post**):
      ```
      https://www.theseopilot.pro/blog-preview?slug={{entry.fields.slug}}
      ```
@@ -17,7 +17,8 @@ This guide configures **Contentful Content Preview** for blog posts so editors c
      ```
      https://www.theseopilot.pro/blog-preview?id={{entry.id}}
      ```
-4. **Save** and ensure the platform is **enabled** for your blog content type.
+4. **Save** and ensure the platform is **enabled** for **Page – Blog Post**.
+5. Your **Page – Blog Post** model must have a **Slug** field (API ID: `slug`). The token `{{entry.fields.slug}}` uses it.
 
 ## 2. Preview API (Node proxy)
 
@@ -30,10 +31,10 @@ The preview page fetches draft content via a small **Preview API** service. The 
    - **Environment:**
      - `CONTENTFUL_SPACE_ID` — your space ID
      - `CONTENTFUL_PREVIEW_TOKEN` — **Content preview / Preview API** token (not Delivery)
-     - Optional: `CONTENTFUL_BLOG_CONTENT_TYPE` — default `blogPost`
+     - Optional: `CONTENTFUL_BLOG_CONTENT_TYPE` — default `pageBlogPost`
      - Optional: `PORT` — default `3456`
 
-2. Get the **Preview** token:
+2. **Get the Preview token:**
    - Contentful → **Settings → API keys** → your key.
    - Use the **Content preview API - access token** (or “Preview” token), **not** the Delivery token.
 
@@ -103,8 +104,8 @@ Preview can open in a **new tab** or in an **iframe** in the editor. If you use 
   Check that the Preview API is running, the URL in `config.js` is correct, and your origin is allowed (see CORS above).
 
 - **“Entry not found”**  
-  Confirm the blog content type ID matches `CONTENTFUL_BLOG_CONTENT_TYPE` (default `blogPost`).  
-  Verify the slug or id in the URL and that the entry exists (draft or published).
+  Confirm the blog content type ID matches `CONTENTFUL_BLOG_CONTENT_TYPE` (default `pageBlogPost`).  
+  Verify the slug or id in the URL and that the entry exists (draft or published). Ensure **Page – Blog Post** has **Content blocks** and **SEO fields** linked.
 
 - **401 from Contentful**  
   Use the **Preview** access token, not the Delivery token.

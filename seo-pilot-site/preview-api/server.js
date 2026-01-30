@@ -1,6 +1,6 @@
 /**
  * Contentful Preview API proxy for blog preview.
- * Fetches draft/unpublished entries from preview.contentful.com.
+ * Architecture: Page – Blog Post (content blocks, SEO reference).
  *
  * Env: CONTENTFUL_SPACE_ID, CONTENTFUL_PREVIEW_TOKEN
  * GET /api/preview?slug=xxx  or  ?id=xxx
@@ -9,13 +9,19 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const {
+  unwrap,
+  resolveEntry,
+  buildBodyFromContentBlocks,
+  getSeo,
+} = require('./contentful-helpers');
 
 const app = express();
 const PORT = process.env.PORT || 3456;
 
 const SPACE = process.env.CONTENTFUL_SPACE_ID;
 const TOKEN = process.env.CONTENTFUL_PREVIEW_TOKEN;
-const CONTENT_TYPE = process.env.CONTENTFUL_BLOG_CONTENT_TYPE || 'blogPost';
+const BLOG_CT = process.env.CONTENTFUL_BLOG_CONTENT_TYPE || 'pageBlogPost';
 const PREVIEW_BASE = 'https://preview.contentful.com';
 
 const ALLOW_ORIGINS = [
@@ -36,8 +42,11 @@ app.use(cors({
 }));
 app.use(express.json());
 
-function env(name) {
-  return process.env[name] || '';
+function resolveSeoRef(entry, includes) {
+  const f = entry.fields || {};
+  const ref = unwrap(f.seoFields) || unwrap(f.seo);
+  const id = ref && ref.sys && ref.sys.id;
+  return id ? resolveEntry(id, includes) : null;
 }
 
 app.get('/api/preview', async (req, res) => {
@@ -59,17 +68,17 @@ app.get('/api/preview', async (req, res) => {
   }
 
   try {
-    let url;
+    const q = new URLSearchParams({
+      content_type: BLOG_CT,
+      limit: '1',
+      include: '2',
+    });
     if (id) {
-      url = `${PREVIEW_BASE}/spaces/${SPACE}/environments/master/entries/${id}`;
+      q.set('sys.id', id);
     } else {
-      const q = new URLSearchParams({
-        content_type: CONTENT_TYPE,
-        'fields.slug': slug,
-        limit: '1',
-      });
-      url = `${PREVIEW_BASE}/spaces/${SPACE}/environments/master/entries?${q}`;
+      q.set('fields.slug', slug);
     }
+    const url = `${PREVIEW_BASE}/spaces/${SPACE}/environments/master/entries?${q}`;
 
     const r = await fetch(url, {
       headers: { Authorization: `Bearer ${TOKEN}` },
@@ -85,14 +94,9 @@ app.get('/api/preview', async (req, res) => {
     }
 
     const data = await r.json();
-
-    let entry;
-    if (id) {
-      entry = data;
-    } else {
-      const items = data.items || [];
-      entry = items[0] || null;
-    }
+    const items = data.items || [];
+    const entry = items[0] || null;
+    const includes = data.includes || {};
 
     if (!entry || !entry.fields) {
       return res.status(404).json({
@@ -102,24 +106,25 @@ app.get('/api/preview', async (req, res) => {
     }
 
     const f = entry.fields;
-    const v = (x) => {
-      if (x == null) return undefined;
-      if (typeof x === 'object' && !Array.isArray(x) && x.constructor === Object) {
-        const first = Object.values(x)[0];
-        return first != null ? first : undefined;
-      }
-      return x;
-    };
-    const title = v(f.title) || 'Untitled';
+    const title = unwrap(f.title) || 'Untitled';
+    const subtitle = unwrap(f.subtitle) || '';
+    const contentBlocks = unwrap(f.contentBlocks) || [];
+    const body = buildBodyFromContentBlocks(contentBlocks, includes);
+
+    const seoEntry = resolveSeoRef(entry, includes);
+    const seo = getSeo(seoEntry);
+    const seoTitle = seo.pageTitle || title;
+    const seoDescription = seo.pageDescription || subtitle;
+
     const post = {
       id: entry.sys?.id,
       title,
-      slug: v(f.slug) || entry.sys?.id,
-      excerpt: v(f.excerpt) || '',
-      body: v(f.body) || v(f.content) || '',
-      seoTitle: v(f.seoTitle) || title,
-      seoDescription: v(f.seoDescription) || v(f.excerpt) || '',
-      publishDate: v(f.publishDate),
+      slug: unwrap(f.slug) || entry.sys?.id,
+      excerpt: subtitle,
+      body: body || '',
+      seoTitle,
+      seoDescription,
+      publishDate: unwrap(f.publishedDate),
     };
 
     return res.json({ ok: true, post });

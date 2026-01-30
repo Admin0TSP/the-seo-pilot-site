@@ -103,8 +103,9 @@
 
       function show(msg, isError) {
         statusEl.style.display = 'block';
-        statusEl.textContent = msg;
+        statusEl.innerHTML = msg;
         statusEl.style.color = isError ? '#b91c1c' : 'var(--muted)';
+        statusEl.style.whiteSpace = 'pre-wrap';
         contentEl.style.display = 'none';
       }
 
@@ -131,13 +132,30 @@
         return d.innerHTML;
       }
 
+      function looksLikeToken(s) {
+        return !s || /[\{\}]|_NOT_FOUND|entry\.fields\.|entry\.id/i.test(s);
+      }
+
       if (!slug && !id) {
-        show('Add ?slug=your-post-slug or ?id=entry-id to the URL. In Contentful, use Preview URL: https://www.theseopilot.pro/blog-preview?slug={{entry.fields.slug}}', true);
+        show('Add ?slug=your-post-slug or ?id=entry-id to the URL.\n\nIn Contentful → Settings → Content preview, set Preview URL to:\nhttps://www.theseopilot.pro/blog-preview?slug={{entry.fields.slug}}\n\nUse your main site (theseopilot.pro), not the Preview API URL.', true);
+        return;
+      }
+
+      var useId = !!id;
+      var param = useId ? id : slug;
+      if (looksLikeToken(param)) {
+        show(
+          'Slug/id look like unresolved Contentful tokens (e.g. {{entry.fields.slug}} or _NOT_FOUND).\n\n' +
+          '1. In Contentful → Settings → Content preview, set Preview URL to:\n   https://www.theseopilot.pro/blog-preview?slug={{entry.fields.slug}}\n\n' +
+          '2. Ensure your blog content type has a field with API ID "slug".\n' +
+          '3. Or use entry ID: .../blog-preview?id={{entry.id}}',
+          true
+        );
         return;
       }
 
       if (!apiBase) {
-        show('Preview API base URL not set. Create /blog-preview/config.js with window.PREVIEW_API_BASE = "https://your-preview-api.onrender.com"; See docs/PREVIEW-SETUP.md.', true);
+        show('Preview API base URL not set. Set window.PREVIEW_API_BASE in /blog-preview/config.js. See docs/PREVIEW-SETUP.md.', true);
         return;
       }
 
@@ -145,12 +163,26 @@
       var url = apiBase.replace(/\/$/, '') + '/api/preview?' + q;
 
       fetch(url)
-        .then(function (r) { return r.json(); })
+        .then(function (r) {
+          return r.text().then(function (text) {
+            var data;
+            try {
+              data = text ? JSON.parse(text) : {};
+            } catch (e) {
+              throw new Error('API returned invalid JSON. Check Preview API URL and that the service is running.');
+            }
+            if (!r.ok) {
+              var err = (data && data.error) ? data.error : ('HTTP ' + r.status);
+              throw new Error(err);
+            }
+            return data;
+          });
+        })
         .then(function (data) {
           if (data.ok && data.post) {
             render(data.post);
           } else {
-            show(data.error || 'Entry not found', true);
+            show((data && data.error) || 'Entry not found', true);
           }
         })
         .catch(function (err) {

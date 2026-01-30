@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 /**
- * Generate Resources pages from Contentful.
- * - Blog listing + /resources/blog/{slug}/index.html
- * - Case studies listing + /resources/case-studies/{slug}/index.html (Contentful-only; Aspora is static)
+ * Generate Resources from Contentful.
+ * Architecture: Page – Blog Post, Page – Case Study; Component – SEO, Content Block, Result Block.
+ *
+ * - Blog listing + /resources/blog/{slug}/
+ * - Case studies listing + /resources/case-studies/{slug}/ (includes static Aspora)
  *
  * Requires: CONTENTFUL_SPACE_ID, CONTENTFUL_ACCESS_TOKEN in .env
  * Run: npm run generate
@@ -14,17 +16,23 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const BASE = 'https://theseopilot.pro';
 
+const BLOG_CT = process.env.CONTENTFUL_BLOG_CONTENT_TYPE || 'pageBlogPost';
+const CASE_STUDY_CT = process.env.CONTENTFUL_CASE_STUDY_CONTENT_TYPE || 'pageCaseStudy';
+
+const {
+  unwrap,
+  resolveEntry,
+  resolveAsset,
+  assetUrl,
+  escapeHtml,
+  buildBodyFromContentBlocks,
+  getSeo,
+  buildResultsFromResultBlocks,
+  richTextToHtml,
+} = require('./contentful-helpers');
+
 function env(name) {
   return process.env[name] || '';
-}
-
-function escapeHtml(s) {
-  if (s == null) return '';
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
 }
 
 function loadDotenv() {
@@ -137,19 +145,28 @@ function writeFile(filePath, content) {
   fs.writeFileSync(filePath, content, 'utf8');
 }
 
+function resolveSeoRef(entry, includes) {
+  const f = entry.fields || {};
+  const ref = unwrap(f.seoFields) || unwrap(f.seo);
+  const id = ref && ref.sys && ref.sys.id;
+  return id ? resolveEntry(id, includes) : null;
+}
+
 async function generateBlog(data) {
   const listing = data.items || [];
+  const includes = data.includes || {};
+
   const listHtml = listing
     .map((it) => {
       const f = it.fields || {};
-      const slug = f.slug || it.sys?.id || 'post';
-      const title = f.title || 'Untitled';
-      const excerpt = f.excerpt || '';
+      const slug = unwrap(f.slug) || it.sys?.id || 'post';
+      const title = unwrap(f.title) || 'Untitled';
+      const subtitle = unwrap(f.subtitle) || '';
       const href = `/resources/blog/${encodeURIComponent(slug)}/`;
       return `
       <article>
         <h2><a href="${href}">${escapeHtml(title)}</a></h2>
-        <p>${escapeHtml(excerpt)}</p>
+        <p>${escapeHtml(subtitle)}</p>
         <a href="${href}">Read more →</a>
       </article>`;
     })
@@ -175,7 +192,7 @@ ${header()}
       </div>
     </section>
     <div id="blogList" class="blog-list container">
-      ${listHtml || '<p style="text-align:center;color:var(--muted);">No posts yet. Add blog posts in Contentful (content_type=blogPost).</p>'}
+      ${listHtml || `<p style="text-align:center;color:var(--muted);">No posts yet. Add <strong>Page – Blog Post</strong> entries in Contentful (content type: ${BLOG_CT}).</p>`}
     </div>
   </main>
 ${footer()}
@@ -186,13 +203,17 @@ ${footer()}
 
   for (const it of listing) {
     const f = it.fields || {};
-    const slug = f.slug || it.sys?.id || 'post';
-    const title = f.title || 'Untitled';
-    const excerpt = f.excerpt || '';
-    const body = f.body || f.content || '';
-    const seoTitle = f.seoTitle || title;
-    const seoDescription = f.seoDescription || excerpt;
-    const canonical = `${BASE}/resources/blog/${encodeURIComponent(slug)}/`;
+    const slug = unwrap(f.slug) || it.sys?.id || 'post';
+    const title = unwrap(f.title) || 'Untitled';
+    const subtitle = unwrap(f.subtitle) || '';
+    const blocks = unwrap(f.contentBlocks) || [];
+    const body = buildBodyFromContentBlocks(blocks, includes);
+
+    const seoEntry = resolveSeoRef(it, includes);
+    const seo = getSeo(seoEntry);
+    const seoTitle = seo.pageTitle || title;
+    const seoDescription = seo.pageDescription || subtitle;
+    const canonical = seo.canonicalUrl || `${BASE}/resources/blog/${encodeURIComponent(slug)}/`;
 
     const postHtml = `<!DOCTYPE html>
 <html lang="en">
@@ -208,9 +229,10 @@ ${header()}
       <a href="/">Home</a> / <a href="/resources/">Resources</a> / <a href="/resources/blog/">Blog</a> / ${escapeHtml(title)}
     </nav>
     <div class="container" style="padding-top:1rem;">
-      <h1 style="margin-bottom:1rem;">${escapeHtml(title)}</h1>
+      <h1 style="margin-bottom:0.5rem;">${escapeHtml(title)}</h1>
+      ${subtitle ? `<p style="color:var(--muted);margin-bottom:1.5rem;">${escapeHtml(subtitle)}</p>` : ''}
       <div class="legal-page">
-        ${body}
+        ${body || '<p>No content yet.</p>'}
       </div>
     </div>
   </main>
@@ -225,7 +247,9 @@ ${footer()}
 
 async function generateCaseStudies(data) {
   const listing = data.items || [];
+  const includes = data.includes || {};
   const cards = [];
+
   const aspora = {
     slug: 'aspora-ai-visibility',
     title: 'Aspora — From Rankings to AI Visibility',
@@ -242,16 +266,26 @@ async function generateCaseStudies(data) {
 
   for (const it of listing) {
     const f = it.fields || {};
-    const slug = f.slug || it.sys?.id;
+    const slug = unwrap(f.slug) || it.sys?.id;
     if (!slug) continue;
-    const title = f.title || 'Case Study';
-    const client = f.clientName || f.client || '';
-    const metric = f.killerMetric || '';
+    const clientName = unwrap(f.clientName) || 'Case Study';
+    const industry = unwrap(f.industry) || '';
+    const resultsBlocks = unwrap(f.resultsBlocks) || [];
+    const firstResult = resultsBlocks[0];
+    let metric = unwrap(f.keyMetrics) || '';
+    if (!metric && firstResult && firstResult.sys && firstResult.sys.id) {
+      const rb = resolveEntry(firstResult.sys.id, includes);
+      if (rb && rb.fields) {
+        const v = unwrap(rb.fields.metricValue);
+        const l = unwrap(rb.fields.metricLabel);
+        if (v || l) metric = [v, l].filter(Boolean).join(' ');
+      }
+    }
     const href = `/resources/case-studies/${encodeURIComponent(slug)}/`;
     cards.push(`      <div class="case-study-card">
         <a href="${href}">
-          <h2>${escapeHtml(title)}</h2>
-          <p class="case-study-meta">${escapeHtml(client)}</p>
+          <h2>${escapeHtml(clientName)}</h2>
+          <p class="case-study-meta">${industry ? escapeHtml(industry) + ' · ' : ''}Case study</p>
           <p class="case-study-metric">${escapeHtml(metric)}</p>
         </a>
       </div>`);
@@ -288,41 +322,47 @@ ${footer()}
 
   for (const it of listing) {
     const f = it.fields || {};
-    const slug = f.slug || it.sys?.id;
+    const slug = unwrap(f.slug) || it.sys?.id;
     if (!slug) continue;
-    const title = f.title || 'Case Study';
-    const challenge = f.challenge || '';
-    const strategy = f.strategy || '';
-    const results = f.results || '';
-    const whyAI = f.whyAICites || '';
-    const graph1Url = f.graphImage1Url || '';
-    const graph2Url = f.graphImage2Url || '';
-    const canonical = `${BASE}/resources/case-studies/${encodeURIComponent(slug)}/`;
-    const graphHtml = [graph1Url, graph2Url]
-      .filter(Boolean)
-      .map((u) => `<img src="${escapeHtml(u)}" alt="Results" class="results-graph" loading="lazy" />`)
-      .join('\n        ');
-    const desc = (typeof results === 'string' ? results.replace(/<[^>]+>/g, '') : '').slice(0, 160) + '…';
+    const clientName = unwrap(f.clientName) || 'Case Study';
+    const challenge = unwrap(f.challenge) || '';
+    const strategy = unwrap(f.strategy);
+    const resultsBlocks = unwrap(f.resultsBlocks) || [];
+    const resultsHtml = buildResultsFromResultBlocks(resultsBlocks, includes);
+
+    let strategyHtml = '';
+    if (strategy) {
+      if (typeof strategy === 'object' && strategy.content) {
+        strategyHtml = richTextToHtml(strategy, includes);
+      } else {
+        strategyHtml = escapeHtml(String(strategy));
+      }
+    }
+
+    const seoEntry = resolveSeoRef(it, includes);
+    const seo = getSeo(seoEntry);
+    const seoTitle = seo.pageTitle || clientName;
+    const seoDescription = seo.pageDescription || (challenge ? challenge.replace(/<[^>]+>/g, '').slice(0, 160) + '…' : '');
+    const canonical = seo.canonicalUrl || `${BASE}/resources/case-studies/${encodeURIComponent(slug)}/`;
 
     const studyHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
 ${gtmHead()}
-${baseHead(title + ' | TheSEOPilot', desc, canonical)}
+${baseHead(seoTitle + ' | TheSEOPilot', seoDescription, canonical)}
 </head>
 <body>
 ${gtmBody()}
 ${header()}
   <main class="case-study-page">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a href="/">Home</a> / <a href="/resources/">Resources</a> / <a href="/resources/case-studies/">Case Studies</a> / ${escapeHtml(title)}
+      <a href="/">Home</a> / <a href="/resources/">Resources</a> / <a href="/resources/case-studies/">Case Studies</a> / ${escapeHtml(clientName)}
     </nav>
     <div class="container" style="padding-top:1rem;">
-      <h1 style="margin-bottom:1rem;">${escapeHtml(title)}</h1>
-      <section><h2>The Challenge</h2><p>${escapeHtml(challenge)}</p></section>
-      <section><h2>The Strategy</h2><p>${escapeHtml(strategy)}</p></section>
-      <section><h2>The Results</h2><div class="legal-page">${results || ''}</div>${graphHtml ? '\n        ' + graphHtml : ''}</section>
-      <section><h2>Why AI Started Citing Them</h2><p>${escapeHtml(whyAI)}</p></section>
+      <h1 style="margin-bottom:1rem;">${escapeHtml(clientName)}</h1>
+      <section><h2>The Challenge</h2><div class="legal-page"><p>${escapeHtml(challenge)}</p></div></section>
+      <section><h2>The Strategy</h2><div class="legal-page">${strategyHtml || ''}</div></section>
+      <section><h2>The Results</h2><div class="legal-page">${resultsHtml || ''}</div></section>
     </div>
   </main>
 ${footer()}
@@ -346,12 +386,17 @@ async function main() {
 
   try {
     const [blogRes, csRes] = await Promise.all([
-      fetchContentful('/entries?content_type=blogPost&order=-fields.publishDate'),
-      fetchContentful('/entries?content_type=caseStudy&order=-fields.publishDate').catch(() => ({ items: [] })),
+      fetchContentful(`/entries?content_type=${BLOG_CT}&order=-fields.publishedDate&include=2`),
+      fetchContentful(`/entries?content_type=${CASE_STUDY_CT}&order=-sys.updatedAt&include=2`).catch(() => ({ items: [], includes: {} })),
     ]);
     await generateBlog(blogRes);
     await generateCaseStudies(csRes);
-    console.log('Generated Resources from Contentful.');
+    const nBlog = (blogRes.items || []).length;
+    const nCs = (csRes.items || []).length;
+    console.log(`Generated Resources: ${nBlog} blog posts, ${nCs} case studies.`);
+    if (nBlog === 0) {
+      console.warn(`No Page – Blog Post entries found. Check that CONTENTFUL_BLOG_CONTENT_TYPE (${BLOG_CT}) matches your content type API ID in Contentful.`);
+    }
   } catch (e) {
     console.error('Generate failed:', e.message);
     process.exit(1);
