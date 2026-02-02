@@ -117,11 +117,26 @@ function gtmBody() {
   <!-- End Google Tag Manager (noscript) -->`;
 }
 
+/** Safe JSON for embedding in script tag (escapes </script>) */
+function safeSchemaJson(obj) {
+  const s = JSON.stringify(obj);
+  return s.replace(/<\//g, '<\\/');
+}
+
 function baseHead(title, description, canonical, opts = {}) {
-  const ogImage = opts.ogImage ? `  <meta property="og:image" content="${escapeAttr(opts.ogImage)}" />
+  const ogTitle = opts.ogTitle || title;
+  const ogDesc = (opts.ogDescription || description).slice(0, 200);
+  const ogBlock = `  <meta property="og:title" content="${escapeAttr(ogTitle)}" />
+  <meta property="og:description" content="${escapeAttr(ogDesc)}" />
+  <meta property="og:url" content="${escapeAttr(canonical)}" />
+  <meta property="og:type" content="${opts.ogType || 'website'}" />${opts.ogImage ? `
+  <meta property="og:image" content="${escapeAttr(opts.ogImage)}" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:image" content="${escapeAttr(opts.ogImage)}" />` : '';
-  const schemaJson = opts.schemaJson ? `  <script type="application/ld+json">${opts.schemaJson}</script>` : '';
+  <meta name="twitter:image" content="${escapeAttr(opts.ogImage)}" />` : `
+  <meta name="twitter:card" content="summary" />`}
+  <meta name="twitter:title" content="${escapeAttr(ogTitle)}" />
+  <meta name="twitter:description" content="${escapeAttr(ogDesc)}" />`;
+  const schemaJson = opts.schemaJson ? `  <script type="application/ld+json">${typeof opts.schemaJson === 'string' ? opts.schemaJson : safeSchemaJson(opts.schemaJson)}</script>` : '';
   return `  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${escapeHtml(title)}</title>
@@ -129,7 +144,8 @@ function baseHead(title, description, canonical, opts = {}) {
   <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="/style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
-  <link rel="canonical" href="${escapeHtml(canonical)}" />${ogImage ? '\n' + ogImage : ''}${schemaJson ? '\n' + schemaJson : ''}
+  <link rel="canonical" href="${escapeHtml(canonical)}" />
+${ogBlock}${schemaJson ? '\n' + schemaJson : ''}
   <script defer src="/script.js"></script>`;
 }
 
@@ -267,8 +283,35 @@ ${footer()}
       ? `<section class="blog-faqs" aria-labelledby="faqs-heading"><h2 id="faqs-heading" class="faqs-heading">Frequently Asked Questions</h2><div class="faq-content blog-content">${richTextToHtml(faqsRich, includes)}</div></section>`
       : '';
 
-    const headOpts = {};
+    const headOpts = { ogType: 'article' };
     if (featuredImageAbsolute) headOpts.ogImage = featuredImageAbsolute;
+
+    const articleSchema = {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'Article',
+          headline: title,
+          description: seoDescription,
+          url: canonical,
+          datePublished: publishedDateRaw || undefined,
+          dateModified: publishedDateRaw || undefined,
+          author: author ? { '@type': 'Person', name: author.name } : { '@type': 'Organization', name: 'TheSEOPilot' },
+          publisher: { '@type': 'Organization', name: 'TheSEOPilot', logo: { '@type': 'ImageObject', url: BASE + '/assets/img/logo-footer.webp' } },
+          ...(featuredImageAbsolute && { image: featuredImageAbsolute }),
+        },
+        {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: BASE + '/' },
+            { '@type': 'ListItem', position: 2, name: 'Resources', item: BASE + '/resources/' },
+            { '@type': 'ListItem', position: 3, name: 'Blog', item: BASE + '/resources/blog/' },
+            { '@type': 'ListItem', position: 4, name: title, item: canonical },
+          ],
+        },
+      ],
+    };
+    headOpts.schemaJson = articleSchema;
 
     const metaRow = [publishedDateHtml, authorHtml].filter(Boolean).join('');
 
