@@ -116,15 +116,28 @@ function richTextToHtml(doc, includes = {}) {
   }
 }
 
-function getSeo(seoEntry) {
+function getSeo(seoEntry, includes = {}) {
   if (!seoEntry || !seoEntry.fields) return {};
   const f = seoEntry.fields;
+  const shareImagesRaw = unwrap(f.shareImages) || [];
+  const shareImages = [];
+  if (Array.isArray(shareImagesRaw)) {
+    for (const img of shareImagesRaw) {
+      const id = img && img.sys && img.sys.id;
+      if (id) {
+        const asset = resolveAsset(id, includes);
+        const url = assetUrl(asset);
+        if (url) shareImages.push(url);
+      }
+    }
+  }
   return {
     pageTitle: unwrap(f.pageTitle),
     pageDescription: unwrap(f.pageDescription),
     canonicalUrl: unwrap(f.canonicalUrl),
     noindex: unwrap(f.noindex),
     nofollow: unwrap(f.nofollow),
+    shareImages,
   };
 }
 

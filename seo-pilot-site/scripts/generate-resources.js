@@ -137,10 +137,15 @@ function baseHead(title, description, canonical, opts = {}) {
   <meta name="twitter:title" content="${escapeAttr(ogTitle)}" />
   <meta name="twitter:description" content="${escapeAttr(ogDesc)}" />`;
   const schemaJson = opts.schemaJson ? `  <script type="application/ld+json">${typeof opts.schemaJson === 'string' ? opts.schemaJson : safeSchemaJson(opts.schemaJson)}</script>` : '';
+  // Robots meta: noindex/nofollow from SEO component
+  const robotsParts = [];
+  if (opts.noindex) robotsParts.push('noindex');
+  if (opts.nofollow) robotsParts.push('nofollow');
+  const robotsMeta = robotsParts.length ? `\n  <meta name="robots" content="${robotsParts.join(', ')}" />` : '';
   return `  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${escapeHtml(title)}</title>
-  <meta name="description" content="${escapeHtml(description)}" />
+  <meta name="description" content="${escapeHtml(description)}" />${robotsMeta}
   <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="/style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
@@ -252,10 +257,11 @@ ${footer()}
     }
 
     const seoEntry = resolveSeoRef(it, includes, apiItems);
-    const seo = getSeo(seoEntry);
+    const seo = getSeo(seoEntry, includes);
     const seoTitle = seo.pageTitle || title;
     const seoDescription = seo.pageDescription || subtitle;
     const canonical = seo.canonicalUrl || `${BASE}/resources/blog/${encodeURIComponent(slug)}/`;
+    const seoShareImage = (seo.shareImages && seo.shareImages[0]) || '';
 
     const authorEntry = resolveAuthorRef(it, includes, apiItems);
     const author = getAuthor(authorEntry, includes);
@@ -284,7 +290,12 @@ ${footer()}
       : '';
 
     const headOpts = { ogType: 'article' };
-    if (featuredImageAbsolute) headOpts.ogImage = featuredImageAbsolute;
+    // Image priority: featuredImage > seoComponent shareImages[0]
+    const ogImageUrl = featuredImageAbsolute || seoShareImage;
+    if (ogImageUrl) headOpts.ogImage = ogImageUrl;
+    // Robots directives from SEO component
+    if (seo.noindex) headOpts.noindex = true;
+    if (seo.nofollow) headOpts.nofollow = true;
 
     const articleSchema = {
       '@context': 'https://schema.org',
@@ -298,7 +309,7 @@ ${footer()}
           dateModified: publishedDateRaw || undefined,
           author: author ? { '@type': 'Person', name: author.name } : { '@type': 'Organization', name: 'TheSEOPilot' },
           publisher: { '@type': 'Organization', name: 'TheSEOPilot', logo: { '@type': 'ImageObject', url: BASE + '/assets/img/logo-footer.webp' } },
-          ...(featuredImageAbsolute && { image: featuredImageAbsolute }),
+          ...(ogImageUrl && { image: ogImageUrl }),
         },
         {
           '@type': 'BreadcrumbList',
@@ -442,17 +453,23 @@ ${footer()}
       }
     }
 
-    const seoEntry = resolveSeoRef(it, includes);
-    const seo = getSeo(seoEntry);
+    const seoEntry = resolveSeoRef(it, includes, data.items || []);
+    const seo = getSeo(seoEntry, includes);
     const seoTitle = seo.pageTitle || clientName;
     const seoDescription = seo.pageDescription || (challenge ? challenge.replace(/<[^>]+>/g, '').slice(0, 160) + '…' : '');
     const canonical = seo.canonicalUrl || `${BASE}/resources/case-studies/${encodeURIComponent(slug)}/`;
+    const seoShareImage = (seo.shareImages && seo.shareImages[0]) || '';
+
+    const csHeadOpts = {};
+    if (seoShareImage) csHeadOpts.ogImage = seoShareImage;
+    if (seo.noindex) csHeadOpts.noindex = true;
+    if (seo.nofollow) csHeadOpts.nofollow = true;
 
     const studyHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
 ${gtmHead()}
-${baseHead(seoTitle + ' | TheSEOPilot', seoDescription, canonical)}
+${baseHead(seoTitle + ' | TheSEOPilot', seoDescription, canonical, csHeadOpts)}
 </head>
 <body>
 ${gtmBody()}
