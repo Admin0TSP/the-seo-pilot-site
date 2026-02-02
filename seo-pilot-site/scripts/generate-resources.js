@@ -30,6 +30,8 @@ const {
   formatPublishedDate,
   buildResultsFromResultBlocks,
   richTextToHtml,
+  extractFaqPairs,
+  buildFaqSchema,
 } = require('./contentful-helpers');
 
 function env(name) {
@@ -289,6 +291,10 @@ ${footer()}
       ? `<section class="blog-faqs" aria-labelledby="faqs-heading"><h2 id="faqs-heading" class="faqs-heading">Frequently Asked Questions</h2><div class="faq-content blog-content">${richTextToHtml(faqsRich, includes)}</div></section>`
       : '';
 
+    // Extract FAQ pairs for FAQPage schema
+    const faqPairs = faqsRich ? extractFaqPairs(faqsRich) : [];
+    const faqSchema = buildFaqSchema(faqPairs);
+
     const headOpts = { ogType: 'article' };
     // Image priority: featuredImage > seoComponent shareImages[0]
     const ogImageUrl = featuredImageAbsolute || seoShareImage;
@@ -297,30 +303,35 @@ ${footer()}
     if (seo.noindex) headOpts.noindex = true;
     if (seo.nofollow) headOpts.nofollow = true;
 
+    const schemaGraph = [
+      {
+        '@type': 'Article',
+        headline: title,
+        description: seoDescription,
+        url: canonical,
+        datePublished: publishedDateRaw || undefined,
+        dateModified: publishedDateRaw || undefined,
+        author: author ? { '@type': 'Person', name: author.name } : { '@type': 'Organization', name: 'TheSEOPilot' },
+        publisher: { '@type': 'Organization', name: 'TheSEOPilot', logo: { '@type': 'ImageObject', url: BASE + '/assets/img/logo-footer.webp' } },
+        ...(ogImageUrl && { image: ogImageUrl }),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: BASE + '/' },
+          { '@type': 'ListItem', position: 2, name: 'Resources', item: BASE + '/resources/' },
+          { '@type': 'ListItem', position: 3, name: 'Blog', item: BASE + '/resources/blog/' },
+          { '@type': 'ListItem', position: 4, name: title, item: canonical },
+        ],
+      },
+    ];
+    // Add FAQPage schema if FAQ pairs exist
+    if (faqSchema) {
+      schemaGraph.push(faqSchema);
+    }
     const articleSchema = {
       '@context': 'https://schema.org',
-      '@graph': [
-        {
-          '@type': 'Article',
-          headline: title,
-          description: seoDescription,
-          url: canonical,
-          datePublished: publishedDateRaw || undefined,
-          dateModified: publishedDateRaw || undefined,
-          author: author ? { '@type': 'Person', name: author.name } : { '@type': 'Organization', name: 'TheSEOPilot' },
-          publisher: { '@type': 'Organization', name: 'TheSEOPilot', logo: { '@type': 'ImageObject', url: BASE + '/assets/img/logo-footer.webp' } },
-          ...(ogImageUrl && { image: ogImageUrl }),
-        },
-        {
-          '@type': 'BreadcrumbList',
-          itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'Home', item: BASE + '/' },
-            { '@type': 'ListItem', position: 2, name: 'Resources', item: BASE + '/resources/' },
-            { '@type': 'ListItem', position: 3, name: 'Blog', item: BASE + '/resources/blog/' },
-            { '@type': 'ListItem', position: 4, name: title, item: canonical },
-          ],
-        },
-      ],
+      '@graph': schemaGraph,
     };
     headOpts.schemaJson = articleSchema;
 

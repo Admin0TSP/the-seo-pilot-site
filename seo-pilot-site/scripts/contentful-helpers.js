@@ -152,6 +152,81 @@ function getSeo(seoEntry, includes = {}) {
 }
 
 /**
+ * Extract FAQ pairs from Rich Text document for FAQPage schema.
+ * Expects: heading (question) followed by paragraph(s) (answer).
+ * Supports h2, h3, h4, h5, h6 as question headings.
+ * @param {object} doc - Contentful Rich Text document
+ * @returns {{ question: string, answer: string }[]}
+ */
+function extractFaqPairs(doc) {
+  if (!doc || !doc.content || !Array.isArray(doc.content)) return [];
+  const headingTypes = ['heading-2', 'heading-3', 'heading-4', 'heading-5', 'heading-6'];
+  const pairs = [];
+  let currentQuestion = null;
+  let currentAnswerParts = [];
+
+  function textFromNode(node) {
+    if (!node) return '';
+    if (node.nodeType === 'text') return node.value || '';
+    if (node.content && Array.isArray(node.content)) {
+      return node.content.map(textFromNode).join('');
+    }
+    return '';
+  }
+
+  function flushPair() {
+    if (currentQuestion && currentAnswerParts.length > 0) {
+      pairs.push({
+        question: currentQuestion.trim(),
+        answer: currentAnswerParts.join(' ').trim(),
+      });
+    }
+    currentQuestion = null;
+    currentAnswerParts = [];
+  }
+
+  for (const node of doc.content) {
+    const nodeType = node.nodeType;
+    if (headingTypes.includes(nodeType)) {
+      // Flush previous Q&A pair
+      flushPair();
+      // Start new question
+      currentQuestion = textFromNode(node);
+    } else if (nodeType === 'paragraph' || nodeType === 'unordered-list' || nodeType === 'ordered-list') {
+      // Accumulate answer content
+      if (currentQuestion) {
+        currentAnswerParts.push(textFromNode(node));
+      }
+    }
+    // Skip other node types (embedded entries, etc.) for FAQ extraction
+  }
+  // Flush last pair
+  flushPair();
+
+  return pairs;
+}
+
+/**
+ * Build FAQPage schema from FAQ pairs.
+ * @param {{ question: string, answer: string }[]} pairs
+ * @returns {object|null} - FAQPage schema object or null if no pairs
+ */
+function buildFaqSchema(pairs) {
+  if (!pairs || pairs.length === 0) return null;
+  return {
+    '@type': 'FAQPage',
+    mainEntity: pairs.map((p) => ({
+      '@type': 'Question',
+      name: p.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: p.answer,
+      },
+    })),
+  };
+}
+
+/**
  * Format published date for display (e.g. "January 29, 2026").
  */
 function formatPublishedDate(isoDate) {
@@ -239,4 +314,6 @@ module.exports = {
   getFeaturedImageUrl,
   formatPublishedDate,
   buildResultsFromResultBlocks,
+  extractFaqPairs,
+  buildFaqSchema,
 };
