@@ -1,22 +1,40 @@
 
 // EmailJS Contact Form Submission
-document.getElementById("contactForm").addEventListener("submit", function (e) {
-  e.preventDefault();
+const contactForm = document.getElementById("contactForm");
+if (contactForm) {
+  contactForm.addEventListener("submit", function (e) {
+    e.preventDefault();
 
-  emailjs.sendForm('service_x943cgt', 'template_capb6qn', this)
-    .then(() => {
-      document.getElementById("contactForm").style.display = "none";
-      document.getElementById("formMessage").style.display = "block";
-    }, (error) => {
-      alert('❌ Failed to send email. Please try again.');
-      console.error('EmailJS Error:', error);
-    });
-});
-
+    emailjs.sendForm('service_x943cgt', 'template_capb6qn', this)
+      .then(() => {
+        document.getElementById("contactForm").style.display = "none";
+        document.getElementById("formMessage").style.display = "block";
+      }, (error) => {
+        alert('❌ Failed to send email. Please try again.');
+        console.error('EmailJS Error:', error);
+      });
+  });
+}
 
 // Mobile Nav Toggle
 function toggleMenu() {
   document.getElementById("mobileNav").classList.toggle("active");
+}
+
+// FAQ Accordion Toggle
+function toggleFaq(button) {
+  const faqItem = button.closest('.faq-item');
+  const isActive = faqItem.classList.contains('active');
+  
+  // Close all other FAQs
+  document.querySelectorAll('.faq-item.active').forEach(item => {
+    if (item !== faqItem) {
+      item.classList.remove('active');
+    }
+  });
+  
+  // Toggle current FAQ
+  faqItem.classList.toggle('active', !isActive);
 }
 
 // Scroll-triggered Animations
