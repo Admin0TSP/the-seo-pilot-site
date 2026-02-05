@@ -554,13 +554,18 @@ h2 {
 }
 
 .bar-full {
-  background: linear-gradient(90deg, #22c55e, #16a34a);
+  background: linear-gradient(90deg, #94a3b8, #64748b);
   width: 100%;
 }
 
 .bar-partial {
   background: linear-gradient(90deg, #f87171, #ef4444);
   width: 35%;
+}
+
+.bar-accent {
+  background: linear-gradient(90deg, var(--accent), #ffd272);
+  width: 100%;
 }
 
 .visual-label {
@@ -586,6 +591,23 @@ h2 {
   gap: 2rem;
   max-width: 1100px;
   margin: 0 auto 2.5rem;
+}
+
+.services-grid-6 {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 1200px;
+}
+
+@media (max-width: 900px) {
+  .services-grid-6 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .services-grid-6 {
+    grid-template-columns: 1fr;
+  }
 }
 
 .service-card {
