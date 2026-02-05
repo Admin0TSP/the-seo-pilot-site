@@ -4,7 +4,7 @@
  */
 
 const { documentToHtmlString } = require('@contentful/rich-text-html-renderer');
-const { BLOCKS } = require('@contentful/rich-text-types');
+const { BLOCKS, INLINES } = require('@contentful/rich-text-types');
 
 function unwrap(x) {
   if (x == null) return undefined;
@@ -34,8 +34,68 @@ function assetUrl(asset) {
   return url ? (url.startsWith('//') ? 'https:' + url : url) : '';
 }
 
-function richTextToHtml(doc, includes = {}) {
+/** Resolve embedded entry from node - supports both link and pre-resolved target */
+function resolveEmbeddedEntry(node, includes, items = []) {
+  const target = node.data?.target;
+  if (!target) return null;
+  // Pre-resolved: target has fields (e.g. from SDK or transformed response)
+  if (target.fields) return target;
+  // Link: target has sys.id, resolve from includes/items
+  const id = target.sys?.id;
+  if (!id) return null;
+  return resolveEntry(id, includes, items);
+}
+
+/** Render CTA block or rich content block from resolved entry */
+function renderEmbeddedEntry(entry, includes, items = [], richTextToHtmlRef) {
+  if (!entry || !entry.fields) return '';
+  const ct = (entry.sys?.contentType?.sys?.id || entry.sys?.contentType?.id || '').toLowerCase();
+  const blockTypeId = (process.env.CONTENTFUL_RICH_CONTENT_BLOCK_TYPE || 'richContentBlock').toLowerCase();
+  const ctaTypeId = (process.env.CONTENTFUL_CTA_BLOCK_TYPE || 'ctaBlock').toLowerCase();
+
+  if (ct === ctaTypeId) {
+    const f = entry.fields;
+    const heading = unwrap(f.heading) || unwrap(f.headline) || '';
+    const desc = unwrap(f.description) || unwrap(f.body) || '';
+    const btn = unwrap(f.buttonText) || unwrap(f.button_label) || unwrap(f.ctaText) || 'Learn more';
+    const url = unwrap(f.buttonUrl) || unwrap(f.button_url) || unwrap(f.ctaUrl) || unwrap(f.link) || '#';
+    let h = '';
+    if (heading) h += `<h3 class="cta-block-heading">${escapeHtml(heading)}</h3>`;
+    if (desc) h += `<p class="cta-block-desc">${escapeHtml(desc)}</p>`;
+    if (url && btn) h += `<a href="${escapeAttr(url)}" class="cta-btn">${escapeHtml(btn)}</a>`;
+    return h ? `<div class="content-block content-block--cta">${h}</div>` : '';
+  }
+  if (ct === blockTypeId) {
+    const f = entry.fields;
+    const rich = unwrap(f.richText) || unwrap(f.rich_text) || unwrap(f.body) || unwrap(f.content);
+    const img = unwrap(f.image);
+    const cap = unwrap(f.caption) || '';
+    const fullWidth = unwrap(f.fullWidth) || unwrap(f.full_width);
+    const blockType = unwrap(f.blockType) || unwrap(f.block_type);
+    const typeClass = blockTypeClass(blockType);
+    let html = '';
+    if (rich && rich.content && Array.isArray(rich.content) && rich.content.length) {
+      html = richTextToHtmlRef(rich, includes, items);
+    }
+    if (img && img.sys && img.sys.id) {
+      const a = resolveAsset(img.sys.id, includes);
+      const u = assetUrl(a);
+      if (u) html += `<figure class="content-block-figure"><img src="${u}" alt="${escapeAttr(cap)}" loading="lazy" />${cap ? `<figcaption>${escapeHtml(cap)}</figcaption>` : ''}</figure>`;
+    }
+    const base = 'content-block content-block--' + typeClass;
+    const full = fullWidth ? ' content-block--full' : '';
+    return html ? `<div class="${base}${full}">${html}</div>` : '';
+  }
+  return '';
+}
+
+function richTextToHtml(doc, includes = {}, items = []) {
   if (!doc || !doc.content) return '';
+  const renderEmbedded = (node) => {
+    const entry = resolveEmbeddedEntry(node, includes, items);
+    return renderEmbeddedEntry(entry, includes, items, richTextToHtml);
+  };
+
   const options = {
     renderNode: {
       [BLOCKS.EMBEDDED_ASSET]: (node) => {
@@ -45,47 +105,10 @@ function richTextToHtml(doc, includes = {}) {
         const title = unwrap(asset?.fields?.title) || '';
         return url ? `<img src="${url}" alt="${escapeAttr(title)}" loading="lazy" />` : '';
       },
-      [BLOCKS.EMBEDDED_ENTRY]: (node) => {
-        const id = node.data?.target?.sys?.id;
-        const entry = resolveEntry(id, includes, []);
-        if (!entry || !entry.fields) return '';
-        const ct = entry.sys?.contentType?.sys?.id;
-        const blockTypeId = process.env.CONTENTFUL_RICH_CONTENT_BLOCK_TYPE || 'richContentBlock';
-        const ctaTypeId = process.env.CONTENTFUL_CTA_BLOCK_TYPE || 'ctaBlock';
-        if (ct === blockTypeId) {
-          const f = entry.fields;
-          const rich = unwrap(f.richText) || unwrap(f.rich_text) || unwrap(f.body) || unwrap(f.content);
-          const img = unwrap(f.image);
-          const cap = unwrap(f.caption) || '';
-          const fullWidth = unwrap(f.fullWidth) || unwrap(f.full_width);
-          const blockType = unwrap(f.blockType) || unwrap(f.block_type);
-          const typeClass = blockTypeClass(blockType);
-          let html = '';
-          if (rich && rich.content && Array.isArray(rich.content) && rich.content.length) {
-            html = richTextToHtml(rich, includes);
-          }
-          if (img && img.sys && img.sys.id) {
-            const a = resolveAsset(img.sys.id, includes);
-            const u = assetUrl(a);
-            if (u) html += `<figure class="content-block-figure"><img src="${u}" alt="${escapeAttr(cap)}" loading="lazy" />${cap ? `<figcaption>${escapeHtml(cap)}</figcaption>` : ''}</figure>`;
-          }
-          const base = 'content-block content-block--' + typeClass;
-          const full = fullWidth ? ' content-block--full' : '';
-          return html ? `<div class="${base}${full}">${html}</div>` : '';
-        }
-        if (ct === ctaTypeId) {
-          const f = entry.fields;
-          const heading = unwrap(f.heading) || '';
-          const desc = unwrap(f.description) || '';
-          const btn = unwrap(f.buttonText) || unwrap(f.button_label) || 'Learn more';
-          const url = unwrap(f.buttonUrl) || unwrap(f.button_url) || '#';
-          let h = '';
-          if (heading) h += `<h3 class="cta-block-heading">${escapeHtml(heading)}</h3>`;
-          if (desc) h += `<p class="cta-block-desc">${escapeHtml(desc)}</p>`;
-          if (url && btn) h += `<a href="${escapeAttr(url)}" class="cta-btn">${escapeHtml(btn)}</a>`;
-          return h ? `<div class="content-block content-block--cta">${h}</div>` : '';
-        }
-        return '';
+      [BLOCKS.EMBEDDED_ENTRY]: renderEmbedded,
+      [INLINES.EMBEDDED_ENTRY]: (node) => {
+        // Inline embeds (e.g. CTA) rendered as block for visibility
+        return renderEmbedded(node);
       },
     },
   };

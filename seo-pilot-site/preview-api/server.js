@@ -83,7 +83,7 @@ app.get('/api/preview', async (req, res) => {
     const q = new URLSearchParams({
       content_type: BLOG_CT,
       limit: '1',
-      include: '5',
+      include: '10',
       locale: '*',
     });
     if (id) {
@@ -130,7 +130,7 @@ app.get('/api/preview', async (req, res) => {
         break;
       }
     }
-    const body = contentRich && contentRich.content ? richTextToHtml(contentRich, includes) : '';
+    const body = contentRich && contentRich.content ? richTextToHtml(contentRich, includes, items) : '';
 
     const faqsFieldIds = (process.env.CONTENTFUL_FAQS_FIELD || 'faqs').split(',').map((s) => s.trim()).filter(Boolean);
     let faqsRich = null;
@@ -142,7 +142,7 @@ app.get('/api/preview', async (req, res) => {
       }
     }
     const faqsHtml = faqsRich && faqsRich.content && faqsRich.content.length
-      ? `<section class="blog-faqs" aria-labelledby="faqs-heading"><h2 id="faqs-heading" class="faqs-heading">Frequently Asked Questions</h2><div class="faq-content blog-content">${richTextToHtml(faqsRich, includes)}</div></section>`
+      ? `<section class="blog-faqs" aria-labelledby="faqs-heading"><h2 id="faqs-heading" class="faqs-heading">Frequently Asked Questions</h2><div class="faq-content blog-content">${richTextToHtml(faqsRich, includes, items)}</div></section>`
       : '';
 
     const featuredImageUrl = getFeaturedImageUrl(entry, includes);

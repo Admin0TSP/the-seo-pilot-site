@@ -251,7 +251,7 @@ ${footer()}
         break;
       }
     }
-    const body = contentRich && contentRich.content ? richTextToHtml(contentRich, includes) : '';
+    const body = contentRich && contentRich.content ? richTextToHtml(contentRich, includes, apiItems) : '';
 
     if (process.env.CONTENTFUL_DEBUG && !body) {
       const fieldKeys = Object.keys(f);
@@ -288,7 +288,7 @@ ${footer()}
       }
     }
     const faqsHtml = faqsRich && faqsRich.content && faqsRich.content.length
-      ? `<section class="blog-faqs" aria-labelledby="faqs-heading"><h2 id="faqs-heading" class="faqs-heading">Frequently Asked Questions</h2><div class="faq-content blog-content">${richTextToHtml(faqsRich, includes)}</div></section>`
+      ? `<section class="blog-faqs" aria-labelledby="faqs-heading"><h2 id="faqs-heading" class="faqs-heading">Frequently Asked Questions</h2><div class="faq-content blog-content">${richTextToHtml(faqsRich, includes, apiItems)}</div></section>`
       : '';
 
     // Extract FAQ pairs for FAQPage schema
@@ -458,7 +458,7 @@ ${footer()}
     let strategyHtml = '';
     if (strategy) {
       if (typeof strategy === 'object' && strategy.content) {
-        strategyHtml = richTextToHtml(strategy, includes);
+        strategyHtml = richTextToHtml(strategy, includes, data.items || []);
       } else {
         strategyHtml = escapeHtml(String(strategy));
       }
@@ -517,7 +517,7 @@ async function main() {
 
   try {
     const [blogRes, csRes] = await Promise.all([
-      fetchContentful(`/entries?content_type=${BLOG_CT}&order=-fields.publishedDate&include=5&locale=*`),
+      fetchContentful(`/entries?content_type=${BLOG_CT}&order=-fields.publishedDate&include=10&locale=*`),
       fetchContentful(`/entries?content_type=${CASE_STUDY_CT}&order=-sys.updatedAt&include=5&locale=*`).catch(() => ({ items: [], includes: {} })),
     ]);
     await generateBlog(blogRes);
