@@ -46,6 +46,33 @@ function resolveEmbeddedEntry(node, includes, items = []) {
   return resolveEntry(id, includes, items);
 }
 
+/**
+ * Convert a field value to plain text string.
+ * Handles: string, Rich Text document (extracts text), objects.
+ */
+function fieldToText(val) {
+  if (val == null) return '';
+  if (typeof val === 'string') return val;
+  // Rich Text document - extract plain text from content
+  if (typeof val === 'object' && val.nodeType === 'document' && Array.isArray(val.content)) {
+    const extractText = (nodes) => {
+      let text = '';
+      for (const node of nodes) {
+        if (node.nodeType === 'text') {
+          text += node.value || '';
+        } else if (node.content && Array.isArray(node.content)) {
+          text += extractText(node.content);
+        }
+      }
+      return text;
+    };
+    return extractText(val.content);
+  }
+  // Fallback for other objects
+  if (typeof val === 'object') return '';
+  return String(val);
+}
+
 /** Render CTA block or rich content block from resolved entry */
 function renderEmbeddedEntry(entry, includes, items = [], richTextToHtmlRef) {
   if (!entry || !entry.fields) return '';
@@ -55,13 +82,20 @@ function renderEmbeddedEntry(entry, includes, items = [], richTextToHtmlRef) {
 
   if (ct === ctaTypeId) {
     const f = entry.fields;
-    const heading = unwrap(f.heading) || unwrap(f.headline) || '';
-    const desc = unwrap(f.description) || unwrap(f.body) || '';
-    const btn = unwrap(f.buttonText) || unwrap(f.button_label) || unwrap(f.ctaText) || 'Learn more';
-    const url = unwrap(f.buttonUrl) || unwrap(f.button_url) || unwrap(f.ctaUrl) || unwrap(f.link) || '#';
+    const heading = fieldToText(unwrap(f.heading)) || fieldToText(unwrap(f.headline)) || '';
+    const descRaw = unwrap(f.description) || unwrap(f.body);
+    // Description can be Rich Text or plain text
+    let descHtml = '';
+    if (descRaw && typeof descRaw === 'object' && descRaw.nodeType === 'document') {
+      descHtml = richTextToHtmlRef(descRaw, includes, items);
+    } else {
+      descHtml = escapeHtml(fieldToText(descRaw));
+    }
+    const btn = fieldToText(unwrap(f.buttonText)) || fieldToText(unwrap(f.button_label)) || fieldToText(unwrap(f.ctaText)) || 'Learn more';
+    const url = fieldToText(unwrap(f.buttonUrl)) || fieldToText(unwrap(f.button_url)) || fieldToText(unwrap(f.ctaUrl)) || fieldToText(unwrap(f.link)) || '#';
     let h = '';
     if (heading) h += `<h3 class="cta-block-heading">${escapeHtml(heading)}</h3>`;
-    if (desc) h += `<p class="cta-block-desc">${escapeHtml(desc)}</p>`;
+    if (descHtml) h += `<div class="cta-block-desc">${descHtml}</div>`;
     if (url && btn) h += `<a href="${escapeAttr(url)}" class="cta-btn">${escapeHtml(btn)}</a>`;
     return h ? `<div class="content-block content-block--cta">${h}</div>` : '';
   }
@@ -281,7 +315,7 @@ function getFeaturedImageUrl(entry, includes) {
 function getAuthor(authorEntry, includes = {}) {
   if (!authorEntry || !authorEntry.fields) return null;
   const f = authorEntry.fields;
-  const name = unwrap(f.name);
+  const name = fieldToText(unwrap(f.name));
   if (!name) return null;
   const avatar = unwrap(f.avatar);
   let avatarUrl = '';
@@ -292,8 +326,8 @@ function getAuthor(authorEntry, includes = {}) {
   return {
     name,
     avatarUrl,
-    bio: unwrap(f.bio) || '',
-    roleCompany: unwrap(f.roleCompany) || unwrap(f.role_company) || '',
+    bio: fieldToText(unwrap(f.bio)) || '',
+    roleCompany: fieldToText(unwrap(f.roleCompany)) || fieldToText(unwrap(f.role_company)) || '',
   };
 }
 
