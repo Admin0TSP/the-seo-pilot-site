@@ -194,6 +194,23 @@ function getAuthor(authorEntry, includes = {}) {
   };
 }
 
+/**
+ * Render content blocks from a reference array field (e.g. contentBlocks).
+ */
+function renderContentBlocks(refs, includes, items = []) {
+  if (!Array.isArray(refs) || refs.length === 0) return '';
+  const parts = [];
+  for (const ref of refs) {
+    const id = ref && ref.sys && ref.sys.id;
+    if (!id) continue;
+    const entry = resolveEntry(id, includes, items);
+    if (!entry) continue;
+    const html = renderEmbeddedEntry(entry, includes, items, richTextToHtml);
+    if (html) parts.push(html);
+  }
+  return parts.join('\n');
+}
+
 module.exports = {
   unwrap,
   resolveEntry,
@@ -206,4 +223,5 @@ module.exports = {
   getAuthor,
   getFeaturedImageUrl,
   formatPublishedDate,
+  renderContentBlocks,
 };

@@ -324,6 +324,28 @@ function buildResultsFromResultBlocks(refs, includes, items = []) {
   return parts.join('\n');
 }
 
+/**
+ * Render content blocks from a reference array field (e.g. contentBlocks).
+ * Supports CTA blocks and Rich Content blocks.
+ * @param {Array} refs - Array of entry references (from contentBlocks field)
+ * @param {object} includes - Contentful includes
+ * @param {Array} items - Additional items to search for entries
+ * @returns {string} HTML string
+ */
+function renderContentBlocks(refs, includes, items = []) {
+  if (!Array.isArray(refs) || refs.length === 0) return '';
+  const parts = [];
+  for (const ref of refs) {
+    const id = ref && ref.sys && ref.sys.id;
+    if (!id) continue;
+    const entry = resolveEntry(id, includes, items);
+    if (!entry) continue;
+    const html = renderEmbeddedEntry(entry, includes, items, richTextToHtml);
+    if (html) parts.push(html);
+  }
+  return parts.join('\n');
+}
+
 module.exports = {
   unwrap,
   resolveEntry,
@@ -339,4 +361,5 @@ module.exports = {
   buildResultsFromResultBlocks,
   extractFaqPairs,
   buildFaqSchema,
+  renderContentBlocks,
 };

@@ -19,6 +19,7 @@ const {
   richTextToHtml,
   escapeHtml,
   escapeAttr,
+  renderContentBlocks,
 } = require('./contentful-helpers');
 
 const app = express();
@@ -130,7 +131,22 @@ app.get('/api/preview', async (req, res) => {
         break;
       }
     }
-    const body = contentRich && contentRich.content ? richTextToHtml(contentRich, includes, items) : '';
+    const bodyRichText = contentRich && contentRich.content ? richTextToHtml(contentRich, includes, items) : '';
+
+    // Render content blocks from contentBlocks reference field
+    const contentBlocksFieldIds = (process.env.CONTENTFUL_CONTENT_BLOCKS_FIELD || 'contentBlocks,content_blocks,blocks').split(',').map((s) => s.trim()).filter(Boolean);
+    let contentBlocksRefs = null;
+    for (const fid of contentBlocksFieldIds) {
+      const val = unwrap(f[fid]);
+      if (Array.isArray(val) && val.length > 0) {
+        contentBlocksRefs = val;
+        break;
+      }
+    }
+    const contentBlocksHtml = contentBlocksRefs ? renderContentBlocks(contentBlocksRefs, includes, items) : '';
+
+    // Combine: rich text content first, then content blocks
+    const body = [bodyRichText, contentBlocksHtml].filter(Boolean).join('\n');
 
     const faqsFieldIds = (process.env.CONTENTFUL_FAQS_FIELD || 'faqs').split(',').map((s) => s.trim()).filter(Boolean);
     let faqsRich = null;

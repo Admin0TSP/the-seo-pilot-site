@@ -32,6 +32,7 @@ const {
   richTextToHtml,
   extractFaqPairs,
   buildFaqSchema,
+  renderContentBlocks,
 } = require('./contentful-helpers');
 
 function env(name) {
@@ -251,7 +252,22 @@ ${footer()}
         break;
       }
     }
-    const body = contentRich && contentRich.content ? richTextToHtml(contentRich, includes, apiItems) : '';
+    const bodyRichText = contentRich && contentRich.content ? richTextToHtml(contentRich, includes, apiItems) : '';
+
+    // Render content blocks from contentBlocks reference field (CTA blocks, rich content blocks, etc.)
+    const contentBlocksFieldIds = (process.env.CONTENTFUL_CONTENT_BLOCKS_FIELD || 'contentBlocks,content_blocks,blocks').split(',').map((s) => s.trim()).filter(Boolean);
+    let contentBlocksRefs = null;
+    for (const fid of contentBlocksFieldIds) {
+      const val = unwrap(f[fid]);
+      if (Array.isArray(val) && val.length > 0) {
+        contentBlocksRefs = val;
+        break;
+      }
+    }
+    const contentBlocksHtml = contentBlocksRefs ? renderContentBlocks(contentBlocksRefs, includes, apiItems) : '';
+
+    // Combine: rich text content first, then content blocks
+    const body = [bodyRichText, contentBlocksHtml].filter(Boolean).join('\n');
 
     if (process.env.CONTENTFUL_DEBUG && !body) {
       const fieldKeys = Object.keys(f);
