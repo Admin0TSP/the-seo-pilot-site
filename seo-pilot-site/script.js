@@ -57,5 +57,27 @@ document.addEventListener("DOMContentLoaded", () => {
   animatedEls.forEach((el) => observer.observe(el));
 });
 
+// Plans fold tab toggle
+document.addEventListener("DOMContentLoaded", () => {
+  const planButtons = document.querySelectorAll(".plans-toggle-btn");
+  const planViews = document.querySelectorAll(".plan-view");
+
+  if (!planButtons.length || !planViews.length) return;
+
+  planButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const target = button.getAttribute("data-plan-target");
+      const nextView = document.getElementById(`view-${target}`);
+      if (!nextView) return;
+
+      planButtons.forEach((btn) => btn.classList.remove("active"));
+      button.classList.add("active");
+
+      planViews.forEach((view) => view.classList.remove("active"));
+      nextView.classList.add("active");
+    });
+  });
+});
+
 
 
