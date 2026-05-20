@@ -1,0 +1,524 @@
+/* ==========================================================================
+   Flight Trail — hero hook + scroll-guided animations for TheSEOPilot
+   Layers on top of style.css. All selectors prefixed .fp- to avoid collisions.
+   ========================================================================== */
+
+:root {
+  --fp-gold: #f6c95c;
+  --fp-gold-glow: rgba(246, 201, 92, 0.55);
+  --fp-gold-trail: rgba(246, 201, 92, 0.85);
+  --fp-navy: #1a1f36;
+  --fp-progress: 0;
+  --fp-plane-y: 0px;
+  --fp-plane-tilt: 0deg;
+}
+
+/* ==========================================================================
+   1. Top scroll-progress bar — the runway
+   ========================================================================== */
+
+.fp-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 1000;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(26, 31, 54, 0.08) 100%
+  );
+}
+
+.fp-progress__bar {
+  height: 100%;
+  width: calc(var(--fp-progress) * 100%);
+  background: linear-gradient(90deg, var(--fp-gold) 0%, #ffdc7a 50%, var(--fp-gold) 100%);
+  background-size: 200% 100%;
+  animation: fp-runway 3s linear infinite;
+  box-shadow: 0 0 8px var(--fp-gold-glow), 0 0 16px rgba(246, 201, 92, 0.25);
+  transition: width 0.1s linear;
+}
+
+@keyframes fp-runway {
+  0% { background-position: 0% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ==========================================================================
+   2. Paper plane scroll-tracker on the right edge
+   ========================================================================== */
+
+.fp-trail {
+  position: fixed;
+  top: 0;
+  right: 22px;
+  width: 56px;
+  height: 100vh;
+  z-index: 999;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+}
+
+.fp-trail__path {
+  position: absolute;
+  top: 80px;
+  bottom: 80px;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background-image: linear-gradient(
+    to bottom,
+    var(--fp-gold-trail) 0,
+    var(--fp-gold-trail) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  background-size: 2px 12px;
+  background-repeat: repeat-y;
+  /* mask reveals the trail progressively as the user scrolls */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0,
+    #000 calc(var(--fp-progress) * 100%),
+    transparent calc(var(--fp-progress) * 100%)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0,
+    #000 calc(var(--fp-progress) * 100%),
+    transparent calc(var(--fp-progress) * 100%)
+  );
+  opacity: 0.6;
+}
+
+.fp-plane {
+  position: absolute;
+  left: 50%;
+  top: 80px;
+  width: 32px;
+  height: 32px;
+  transform:
+    translate(-50%, var(--fp-plane-y))
+    rotate(var(--fp-plane-tilt));
+  transition: transform 0.18s cubic-bezier(0.3, 0.7, 0.4, 1);
+  filter: drop-shadow(0 4px 8px rgba(246, 201, 92, 0.35));
+  color: var(--fp-gold);
+  will-change: transform;
+}
+
+.fp-plane svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.fp-plane__pulse {
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--fp-gold-glow) 0%, transparent 65%);
+  animation: fp-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes fp-pulse {
+  0%, 100% { transform: scale(0.8); opacity: 0.45; }
+  50%      { transform: scale(1.15); opacity: 0.85; }
+}
+
+/* hide on small screens */
+@media (max-width: 768px) {
+  .fp-trail { right: 8px; width: 36px; }
+  .fp-plane { width: 22px; height: 22px; }
+}
+
+@media (max-width: 480px) {
+  .fp-trail { display: none; }
+}
+
+/* respect reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .fp-progress__bar { animation: none; }
+  .fp-plane__pulse { animation: none; opacity: 0.3; }
+  .fp-plane { transition: none; }
+}
+
+/* ==========================================================================
+   3. Hero hook — staggered headline reveal, cockpit gauge, runway lights
+   ========================================================================== */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+}
+
+/* cockpit gauge in hero top-right */
+.fp-cockpit {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  width: 130px;
+  height: 130px;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+  animation: fp-cockpit-in 1.2s cubic-bezier(0.2, 0.7, 0.3, 1) 0.6s forwards;
+}
+
+.fp-cockpit svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));
+}
+
+.fp-cockpit__needle {
+  transform-origin: 60px 60px;
+  animation: fp-needle 4.5s cubic-bezier(0.4, 0.1, 0.3, 1) infinite;
+}
+
+.fp-cockpit__sweep {
+  transform-origin: 60px 60px;
+  animation: fp-sweep 3s linear infinite;
+}
+
+@keyframes fp-cockpit-in {
+  0%   { opacity: 0; transform: translateY(-12px) rotate(-6deg); }
+  100% { opacity: 1; transform: translateY(0) rotate(0); }
+}
+
+@keyframes fp-needle {
+  0%   { transform: rotate(-72deg); }
+  40%  { transform: rotate(28deg); }
+  60%  { transform: rotate(20deg); }
+  100% { transform: rotate(72deg); }
+}
+
+@keyframes fp-sweep {
+  0%   { transform: rotate(0deg); opacity: 0.7; }
+  100% { transform: rotate(360deg); opacity: 0.7; }
+}
+
+@media (max-width: 768px) {
+  .fp-cockpit { width: 86px; height: 86px; top: 18px; right: 16px; }
+}
+
+/* runway lights along bottom of hero */
+.fp-runway-lights {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  z-index: 3;
+  pointer-events: none;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0,
+    transparent 12px,
+    var(--fp-gold) 12px,
+    var(--fp-gold) 18px,
+    transparent 18px,
+    transparent 30px
+  );
+  background-size: 30px 3px;
+  background-repeat: repeat-x;
+  opacity: 0.7;
+  animation: fp-runway-march 1.6s linear infinite;
+  box-shadow: 0 0 6px var(--fp-gold-glow);
+}
+
+@keyframes fp-runway-march {
+  0%   { background-position: 0 0; }
+  100% { background-position: 30px 0; }
+}
+
+/* word-by-word headline reveal */
+.fp-launch .fp-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(28px) rotate(2deg) scale(0.96);
+  animation: fp-takeoff 0.9s cubic-bezier(0.16, 0.84, 0.3, 1) forwards;
+  margin-right: 0.28em;
+}
+
+@keyframes fp-takeoff {
+  0%   { opacity: 0; transform: translateY(28px) rotate(2deg) scale(0.96); }
+  60%  { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) rotate(0) scale(1); }
+}
+
+/* gold highlight on key word */
+.fp-launch .fp-word--accent {
+  position: relative;
+  color: var(--fp-gold);
+}
+.fp-launch .fp-word--accent::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 0.05em;
+  height: 0.08em;
+  background: var(--fp-gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: fp-underline 0.8s cubic-bezier(0.2, 0.7, 0.3, 1) 1.4s forwards;
+  border-radius: 2px;
+  opacity: 0.5;
+}
+
+@keyframes fp-underline {
+  to { transform: scaleX(1); }
+}
+
+/* hero trust stats count-up entrance */
+.hero-trust .trust-item strong {
+  display: inline-block;
+}
+
+/* scroll-cue mouse under the hero */
+.fp-scroll-cue {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-family: var(--font-heading, 'DM Sans', sans-serif);
+  opacity: 0;
+  animation: fp-cue-in 1s ease 1.6s forwards;
+  pointer-events: none;
+}
+
+.fp-scroll-cue__line {
+  width: 1px;
+  height: 36px;
+  background: linear-gradient(to bottom, transparent 0%, var(--fp-gold) 70%);
+  position: relative;
+  overflow: hidden;
+}
+
+.fp-scroll-cue__line::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background: linear-gradient(to bottom, transparent, var(--fp-gold));
+  animation: fp-cue-drop 1.6s ease-in-out infinite;
+}
+
+@keyframes fp-cue-in {
+  to { opacity: 1; }
+}
+
+@keyframes fp-cue-drop {
+  0%   { top: -14px; opacity: 0; }
+  40%  { opacity: 1; }
+  100% { top: 36px; opacity: 0; }
+}
+
+@media (max-width: 768px) {
+  .fp-scroll-cue { display: none; }
+}
+
+/* ==========================================================================
+   4. Enhanced section reveals — push fade-in past the existing baseline
+   ========================================================================== */
+
+.fade-in {
+  transition:
+    opacity 0.9s cubic-bezier(0.2, 0.7, 0.3, 1),
+    transform 0.9s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.fade-in:not(.visible) {
+  transform: translateY(36px);
+}
+
+/* Section variants — alternate direction so scrolling feels dimensional */
+.section:nth-of-type(odd) .fade-in:not(.visible) {
+  transform: translateY(36px) translateX(-12px);
+}
+.section:nth-of-type(even) .fade-in:not(.visible) {
+  transform: translateY(36px) translateX(12px);
+}
+.section .fade-in.visible {
+  transform: translate(0, 0) !important;
+}
+
+/* Staggered children — fp-stagger applies a delay to each child */
+.fp-stagger > * {
+  transition-delay: calc(var(--fp-i, 0) * 90ms);
+}
+
+/* card hover lift with gold underglow */
+.audience-card,
+.services-grid > *,
+.faq-item {
+  transition:
+    transform 0.35s cubic-bezier(0.2, 0.7, 0.3, 1),
+    box-shadow 0.35s cubic-bezier(0.2, 0.7, 0.3, 1),
+    border-color 0.35s ease;
+}
+
+.audience-card:hover,
+.services-grid > *:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 12px 30px rgba(26, 31, 54, 0.12),
+    0 0 0 1px rgba(246, 201, 92, 0.4),
+    0 0 24px rgba(246, 201, 92, 0.18);
+}
+
+/* counter numbers get an underline-glow when revealing */
+.fp-counter {
+  display: inline-block;
+  position: relative;
+}
+
+.fp-counter::after {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: -4px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--fp-gold), transparent);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 1.2s cubic-bezier(0.2, 0.7, 0.3, 1) 0.4s;
+}
+
+.fp-counter.fp-counter--done::after {
+  transform: scaleX(1);
+}
+
+/* section title gets a small flight-tag prefix when revealed */
+.section-title.fade-in.visible::before {
+  content: "";
+  display: inline-block;
+  width: 36px;
+  height: 2px;
+  background: var(--fp-gold);
+  margin-right: 14px;
+  vertical-align: middle;
+  animation: fp-tag-in 0.5s ease forwards;
+  transform-origin: left;
+}
+
+@keyframes fp-tag-in {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* ==========================================================================
+   5. Section badge — a small altitude readout that floats with each section
+   ========================================================================== */
+
+.fp-altitude {
+  position: fixed;
+  right: 70px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 998;
+  font-family: var(--font-heading, 'DM Sans', sans-serif);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--fp-navy);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(246, 201, 92, 0.4);
+  box-shadow: 0 4px 14px rgba(26, 31, 54, 0.1);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  white-space: nowrap;
+}
+
+.fp-altitude.fp-altitude--visible {
+  opacity: 1;
+}
+
+.fp-altitude__icon {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fp-gold);
+  margin-right: 8px;
+  vertical-align: middle;
+  box-shadow: 0 0 0 3px rgba(246, 201, 92, 0.25);
+  animation: fp-altitude-blink 1.6s ease-in-out infinite;
+}
+
+@keyframes fp-altitude-blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+
+@media (max-width: 1100px) {
+  .fp-altitude { display: none; }
+}
+
+/* ==========================================================================
+   6. Hover micro-interactions on CTAs
+   ========================================================================== */
+
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.btn-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.3, 1);
+  z-index: -1;
+}
+
+.btn-primary:hover::before {
+  transform: translateX(100%);
+}
+
+/* ==========================================================================
+   7. FAQ icon — rotate + glow on open
+   ========================================================================== */
+
+.faq-question {
+  position: relative;
+  transition: background 0.3s ease;
+}
+
+.faq-icon {
+  display: inline-block;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.3, 1),
+              color 0.35s ease;
+}
+
+.faq-item.active .faq-icon {
+  transform: rotate(135deg);
+  color: var(--fp-gold);
+}
