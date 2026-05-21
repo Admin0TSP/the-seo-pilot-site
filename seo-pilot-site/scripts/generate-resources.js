@@ -54,8 +54,8 @@ function nav() {
         <div class="nav-item nav-item--has-sub">
           <a href="/resources/" aria-haspopup="true" aria-expanded="false">Resources</a>
           <div class="nav-submenu" role="menu" aria-label="Resources">
-            <a href="/resources/blog/" role="menuitem"><span class="nav-submenu__label">Blog</span><span class="nav-submenu__hint">Field notes</span></a>
-            <a href="/resources/case-studies/" role="menuitem"><span class="nav-submenu__label">Case Studies</span><span class="nav-submenu__hint">Proof in numbers</span></a>
+            <a href="/resources/blog/" role="menuitem">Blog</a>
+            <a href="/resources/case-studies/" role="menuitem">Case Studies</a>
           </div>
         </div>
         <a href="/#contact" class="nav-cta">Get Started</a>
