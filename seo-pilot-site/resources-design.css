@@ -1,0 +1,1052 @@
+/* ==========================================================================
+   Resources Design — Flight-Control aesthetic for /resources, /blog, /case-studies
+   Layers on top of style.css and flight-trail.css. All selectors prefixed .rx-
+   ========================================================================== */
+
+:root {
+  --rx-navy: #0f1428;
+  --rx-navy-2: #1a1f36;
+  --rx-navy-3: #232a45;
+  --rx-gold: #f6c95c;
+  --rx-gold-soft: rgba(246, 201, 92, 0.18);
+  --rx-gold-line: rgba(246, 201, 92, 0.45);
+  --rx-cream: #faf7ef;
+  --rx-paper: #ffffff;
+  --rx-line: rgba(26, 31, 54, 0.10);
+  --rx-line-strong: rgba(26, 31, 54, 0.18);
+  --rx-mute: #5b657a;
+  --rx-ink: #1f2937;
+  --rx-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --rx-display: 'Fraunces', 'Playfair Display', 'DM Serif Display', Georgia, serif;
+}
+
+/* ==========================================================================
+   1. Page chrome — runway hero
+   ========================================================================== */
+
+.rx-hero {
+  position: relative;
+  padding: 7rem 1.5rem 5rem;
+  background:
+    radial-gradient(1100px 380px at 50% -10%, rgba(246, 201, 92, 0.18), transparent 60%),
+    linear-gradient(180deg, var(--rx-navy) 0%, var(--rx-navy-2) 100%);
+  color: var(--rx-cream);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.rx-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  z-index: -1;
+  opacity: 0.5;
+}
+
+.rx-hero::after {
+  /* center runway line */
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      var(--rx-gold-line) 0,
+      var(--rx-gold-line) 14px,
+      transparent 14px,
+      transparent 28px
+    );
+  opacity: 0.55;
+  z-index: -1;
+}
+
+.rx-hero__inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.rx-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--rx-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--rx-gold);
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--rx-gold-line);
+  border-radius: 999px;
+  background: rgba(246, 201, 92, 0.06);
+  margin-bottom: 1.25rem;
+}
+
+.rx-eyebrow__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--rx-gold);
+  box-shadow: 0 0 8px var(--rx-gold);
+  animation: rx-blip 2.2s ease-in-out infinite;
+}
+
+@keyframes rx-blip {
+  0%, 100% { opacity: 0.4; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+.rx-hero__title {
+  font-family: var(--rx-display);
+  font-weight: 600;
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--rx-cream);
+  margin: 0 0 1rem;
+}
+
+.rx-hero__title em {
+  font-style: italic;
+  color: var(--rx-gold);
+}
+
+.rx-hero__subtitle {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  max-width: 620px;
+  margin: 0 auto;
+  color: rgba(250, 247, 239, 0.78);
+}
+
+.rx-hero__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 2rem;
+  font-family: var(--rx-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(250, 247, 239, 0.55);
+}
+
+.rx-hero__meta-divider {
+  width: 24px;
+  height: 1px;
+  background: var(--rx-gold-line);
+}
+
+/* ==========================================================================
+   2. Breadcrumb — flight log style
+   ========================================================================== */
+
+.rx-crumb {
+  position: relative;
+  z-index: 2;
+  max-width: 1100px;
+  margin: -1.75rem auto 0;
+  padding: 0.65rem 1.25rem;
+  font-family: var(--rx-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rx-mute);
+  background: var(--rx-paper);
+  border: 1px solid var(--rx-line);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: max-content;
+  box-shadow: 0 8px 24px rgba(15, 20, 40, 0.06);
+}
+
+.rx-crumb__wrap {
+  max-width: 1100px;
+  margin: -1.75rem auto 0;
+  padding: 0 1.5rem;
+  position: relative;
+  z-index: 2;
+}
+
+.rx-crumb a {
+  color: var(--rx-navy-2);
+  text-decoration: none;
+  border-bottom: 1px dotted transparent;
+  transition: border-color 0.2s;
+}
+
+.rx-crumb a:hover {
+  border-color: var(--rx-gold);
+}
+
+.rx-crumb__sep {
+  color: var(--rx-gold);
+  font-size: 0.6rem;
+}
+
+/* ==========================================================================
+   3. Resources hub — Hangar bays
+   ========================================================================== */
+
+.rx-hub {
+  max-width: 1100px;
+  margin: 4rem auto 6rem;
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.rx-bay {
+  position: relative;
+  background: var(--rx-paper);
+  border: 1px solid var(--rx-line);
+  border-radius: 18px;
+  padding: 2.5rem 2rem 2rem;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s, border-color 0.3s;
+}
+
+.rx-bay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top right, var(--rx-gold-soft), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+
+.rx-bay:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 48px rgba(15, 20, 40, 0.10);
+  border-color: var(--rx-gold-line);
+}
+
+.rx-bay:hover::before { opacity: 1; }
+
+.rx-bay__code {
+  font-family: var(--rx-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--rx-gold);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.rx-bay__code::before {
+  content: "";
+  width: 22px;
+  height: 1px;
+  background: var(--rx-gold);
+}
+
+.rx-bay__title {
+  font-family: var(--rx-display);
+  font-size: 1.85rem;
+  line-height: 1.15;
+  color: var(--rx-navy-2);
+  margin: 0 0 0.65rem;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+
+.rx-bay__desc {
+  color: var(--rx-mute);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 1.5rem;
+}
+
+.rx-bay__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--rx-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--rx-navy-2);
+  text-decoration: none;
+  position: relative;
+}
+
+.rx-bay__link::after {
+  content: "→";
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--rx-gold);
+}
+
+.rx-bay:hover .rx-bay__link::after {
+  transform: translateX(6px);
+}
+
+/* ==========================================================================
+   4. Blog list — Flight log entries
+   ========================================================================== */
+
+.rx-log {
+  max-width: 920px;
+  margin: 4rem auto 6rem;
+  padding: 0 1.5rem;
+  display: grid;
+  gap: 0;
+}
+
+.rx-log__head {
+  display: grid;
+  grid-template-columns: 110px 1fr 100px;
+  gap: 1rem;
+  padding: 0 0 0.9rem;
+  border-bottom: 1px solid var(--rx-line-strong);
+  font-family: var(--rx-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--rx-mute);
+}
+
+.rx-log__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 110px 1fr 100px;
+  gap: 1rem;
+  padding: 1.75rem 0;
+  border-bottom: 1px solid var(--rx-line);
+  align-items: start;
+  text-decoration: none;
+  color: inherit;
+  transition: padding 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rx-log__row::before {
+  content: "";
+  position: absolute;
+  left: -1.5rem;
+  top: 50%;
+  transform: translateY(-50%) scaleX(0);
+  transform-origin: left center;
+  width: 1rem;
+  height: 2px;
+  background: var(--rx-gold);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rx-log__row:hover {
+  padding-left: 0.75rem;
+}
+
+.rx-log__row:hover::before {
+  transform: translateY(-50%) scaleX(1);
+}
+
+.rx-log__date {
+  font-family: var(--rx-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rx-mute);
+  padding-top: 0.35rem;
+}
+
+.rx-log__body { min-width: 0; }
+
+.rx-log__title {
+  font-family: var(--rx-display);
+  font-size: 1.5rem;
+  line-height: 1.25;
+  color: var(--rx-navy-2);
+  margin: 0 0 0.4rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  transition: color 0.2s;
+}
+
+.rx-log__row:hover .rx-log__title {
+  color: var(--rx-navy);
+}
+
+.rx-log__sub {
+  color: var(--rx-mute);
+  font-size: 0.98rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.rx-log__cta {
+  font-family: var(--rx-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rx-gold);
+  text-align: right;
+  padding-top: 0.45rem;
+  white-space: nowrap;
+}
+
+.rx-log__empty {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--rx-mute);
+  font-family: var(--rx-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+}
+
+/* ==========================================================================
+   5. Case studies list — Mission reports
+   ========================================================================== */
+
+.rx-missions {
+  max-width: 1100px;
+  margin: 4rem auto 6rem;
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.rx-mission {
+  position: relative;
+  background: var(--rx-paper);
+  border: 1px solid var(--rx-line);
+  border-radius: 18px;
+  padding: 2rem 1.75rem;
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s, border-color 0.3s;
+}
+
+.rx-mission::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--rx-gold) 0%, transparent 100%);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rx-mission:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 30px 60px rgba(15, 20, 40, 0.12);
+  border-color: var(--rx-gold-line);
+}
+
+.rx-mission:hover::before { transform: scaleX(1); }
+
+.rx-mission__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  font-family: var(--rx-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--rx-mute);
+}
+
+.rx-mission__industry {
+  padding: 0.3rem 0.65rem;
+  background: var(--rx-navy-2);
+  color: var(--rx-cream);
+  border-radius: 4px;
+}
+
+.rx-mission__timeframe { color: var(--rx-mute); }
+
+.rx-mission__title {
+  font-family: var(--rx-display);
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: var(--rx-navy-2);
+  margin: 0 0 0.4rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.rx-mission__client {
+  font-size: 0.95rem;
+  color: var(--rx-mute);
+  margin: 0 0 1.25rem;
+}
+
+.rx-mission__metric {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 1.1rem 1rem;
+  background: linear-gradient(135deg, rgba(246, 201, 92, 0.10) 0%, rgba(246, 201, 92, 0.02) 100%);
+  border-left: 3px solid var(--rx-gold);
+  border-radius: 0 8px 8px 0;
+  margin: 0 0 1.5rem;
+}
+
+.rx-mission__metric-value {
+  font-family: var(--rx-display);
+  font-size: 1.65rem;
+  font-weight: 600;
+  color: var(--rx-navy);
+  line-height: 1;
+}
+
+.rx-mission__metric-label {
+  font-size: 0.85rem;
+  color: var(--rx-mute);
+  line-height: 1.3;
+}
+
+.rx-mission__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--rx-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--rx-navy-2);
+}
+
+.rx-mission__cta::after {
+  content: "→";
+  color: var(--rx-gold);
+  transition: transform 0.3s;
+}
+
+.rx-mission:hover .rx-mission__cta::after { transform: translateX(6px); }
+
+/* ==========================================================================
+   6. Blog post / case study detail — Editorial layout
+   ========================================================================== */
+
+.rx-article {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 3.5rem 1.5rem 5rem;
+}
+
+.rx-article__head {
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--rx-line);
+}
+
+.rx-article__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--rx-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--rx-gold);
+  margin-bottom: 1rem;
+}
+
+.rx-article__kicker::before {
+  content: "";
+  width: 22px;
+  height: 1px;
+  background: var(--rx-gold);
+}
+
+.rx-article__title {
+  font-family: var(--rx-display);
+  font-weight: 600;
+  font-size: clamp(2rem, 4.5vw, 3.1rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--rx-navy);
+  margin: 0 0 0.85rem;
+}
+
+.rx-article__subtitle {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: var(--rx-mute);
+  margin: 0 0 1.5rem;
+  max-width: 620px;
+}
+
+.rx-article__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  font-family: var(--rx-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--rx-mute);
+}
+
+.rx-article__meta-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--rx-gold);
+}
+
+.rx-article__author {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.rx-article__author img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.rx-article__author-name {
+  color: var(--rx-navy-2);
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--rx-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.rx-article__featured {
+  margin: 0 0 2.5rem;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--rx-line);
+}
+
+.rx-article__featured img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.rx-article__body {
+  font-size: 1.08rem;
+  line-height: 1.78;
+  color: var(--rx-ink);
+}
+
+.rx-article__body > * + * { margin-top: 1.1rem; }
+
+.rx-article__body h2 {
+  font-family: var(--rx-display);
+  font-size: 1.75rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--rx-navy);
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.rx-article__body h3 {
+  font-family: var(--rx-display);
+  font-size: 1.35rem;
+  line-height: 1.3;
+  color: var(--rx-navy-2);
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.rx-article__body p { color: var(--rx-ink); }
+
+.rx-article__body a {
+  color: var(--rx-navy);
+  background-image: linear-gradient(transparent 88%, var(--rx-gold) 88%, var(--rx-gold) 96%, transparent 96%);
+  text-decoration: none;
+  transition: background-size 0.3s;
+}
+
+.rx-article__body blockquote {
+  position: relative;
+  margin: 2rem 0;
+  padding: 1rem 1.5rem 1rem 2.2rem;
+  font-family: var(--rx-display);
+  font-style: italic;
+  font-size: 1.25rem;
+  line-height: 1.45;
+  color: var(--rx-navy-2);
+  border-left: 3px solid var(--rx-gold);
+  background: linear-gradient(90deg, rgba(246, 201, 92, 0.06), transparent);
+}
+
+.rx-article__body ul,
+.rx-article__body ol {
+  padding-left: 1.4rem;
+}
+
+.rx-article__body li { margin-bottom: 0.5rem; }
+
+.rx-article__body img,
+.rx-article__body figure img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin: 1.5rem 0;
+  border: 1px solid var(--rx-line);
+}
+
+.rx-article__body figure { margin: 1.5rem 0; }
+
+.rx-article__body figcaption {
+  font-family: var(--rx-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: var(--rx-mute);
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+/* ==========================================================================
+   7. Case study detail — Mission report
+   ========================================================================== */
+
+.rx-mr {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+.rx-mr__head {
+  background: linear-gradient(180deg, var(--rx-navy) 0%, var(--rx-navy-2) 100%);
+  color: var(--rx-cream);
+  padding: 3rem 2.25rem 2.5rem;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 2.5rem;
+}
+
+.rx-mr__head::before {
+  content: "";
+  position: absolute;
+  top: -40%;
+  right: -10%;
+  width: 480px;
+  height: 480px;
+  background:
+    radial-gradient(circle, rgba(246, 201, 92, 0.20) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.rx-mr__head::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 56px 56px;
+  pointer-events: none;
+  mask-image: linear-gradient(180deg, black, transparent 80%);
+}
+
+.rx-mr__head-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.rx-mr__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  font-family: var(--rx-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.rx-mr__tag {
+  padding: 0.32rem 0.7rem;
+  background: rgba(246, 201, 92, 0.12);
+  color: var(--rx-gold);
+  border: 1px solid var(--rx-gold-line);
+  border-radius: 4px;
+}
+
+.rx-mr__tag--muted {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(250, 247, 239, 0.7);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.rx-mr__title {
+  font-family: var(--rx-display);
+  font-weight: 600;
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5rem;
+  color: var(--rx-cream);
+}
+
+.rx-mr__client {
+  font-family: var(--rx-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  color: rgba(250, 247, 239, 0.6);
+  margin: 0 0 1.5rem;
+}
+
+.rx-mr__client a {
+  color: var(--rx-gold);
+  text-decoration: none;
+}
+
+.rx-mr__metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.rx-mr__metric {
+  padding: 1.1rem 1.25rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  backdrop-filter: blur(4px);
+}
+
+.rx-mr__metric-value {
+  font-family: var(--rx-display);
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--rx-gold);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.rx-mr__metric-label {
+  font-family: var(--rx-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(250, 247, 239, 0.6);
+}
+
+.rx-mr__section {
+  margin: 2.75rem 0;
+  padding-left: 1.25rem;
+  border-left: 1px solid var(--rx-line);
+  position: relative;
+}
+
+.rx-mr__section::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 0;
+  width: 1px;
+  height: 36px;
+  background: var(--rx-gold);
+}
+
+.rx-mr__label {
+  font-family: var(--rx-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--rx-gold);
+  margin: 0 0 0.5rem;
+  display: block;
+}
+
+.rx-mr__heading {
+  font-family: var(--rx-display);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--rx-navy);
+  margin: 0 0 1.1rem;
+  font-weight: 600;
+}
+
+.rx-mr__body {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--rx-ink);
+}
+
+.rx-mr__body > * + * { margin-top: 1rem; }
+
+.rx-mr__body h2,
+.rx-mr__body h3 {
+  font-family: var(--rx-display);
+  color: var(--rx-navy);
+  font-weight: 600;
+  margin-top: 1.5rem;
+}
+
+.rx-mr__body h2 { font-size: 1.45rem; }
+.rx-mr__body h3 { font-size: 1.2rem; }
+
+.rx-mr__body img,
+.rx-mr__body figure img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin: 1.5rem 0;
+  border: 1px solid var(--rx-line);
+  box-shadow: 0 12px 32px rgba(15, 20, 40, 0.08);
+}
+
+.rx-mr__body ul,
+.rx-mr__body ol {
+  padding-left: 1.4rem;
+}
+
+.rx-mr__body li { margin-bottom: 0.4rem; }
+
+.rx-mr__body blockquote {
+  margin: 1.5rem 0;
+  padding: 0.75rem 1.25rem;
+  border-left: 3px solid var(--rx-gold);
+  background: linear-gradient(90deg, rgba(246, 201, 92, 0.07), transparent);
+  font-family: var(--rx-display);
+  font-style: italic;
+  color: var(--rx-navy-2);
+}
+
+/* ==========================================================================
+   8. FAQs (used on blog posts)
+   ========================================================================== */
+
+.rx-faq {
+  max-width: 760px;
+  margin: 3rem auto 0;
+  padding: 2rem 1.5rem 0;
+  border-top: 1px solid var(--rx-line);
+}
+
+.rx-faq__title {
+  font-family: var(--rx-display);
+  font-size: 1.65rem;
+  color: var(--rx-navy);
+  margin: 0 0 1.5rem;
+  font-weight: 600;
+}
+
+.rx-faq__title::before {
+  content: "FAQ";
+  display: block;
+  font-family: var(--rx-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  color: var(--rx-gold);
+  margin-bottom: 0.4rem;
+  font-weight: 500;
+}
+
+.rx-faq .blog-content h2,
+.rx-faq .blog-content h3,
+.rx-faq .blog-content h4 {
+  font-family: var(--rx-display);
+  font-size: 1.2rem;
+  color: var(--rx-navy);
+  margin-top: 1.75rem;
+  margin-bottom: 0.4rem;
+}
+
+/* ==========================================================================
+   9. Entrance animations — CSS-only, driven by --fp-i set by flight-trail.js
+   Parent container must have data-fp-stagger
+   ========================================================================== */
+
+@keyframes rx-enter {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+[data-fp-stagger] > .rx-bay,
+[data-fp-stagger] > .rx-mission,
+[data-fp-stagger] > .rx-log__row {
+  opacity: 0;
+  animation: rx-enter 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(var(--fp-i, 0) * 80ms + 120ms);
+}
+
+/* ==========================================================================
+   10. Responsive
+   ========================================================================== */
+
+@media (max-width: 760px) {
+  .rx-hero { padding: 5.5rem 1.25rem 3.5rem; }
+  .rx-crumb { font-size: 0.65rem; padding: 0.55rem 1rem; }
+  .rx-hub { gap: 1rem; margin: 2.5rem auto 4rem; }
+  .rx-bay { padding: 2rem 1.5rem 1.75rem; }
+  .rx-log__head { grid-template-columns: 1fr; gap: 0; padding-bottom: 0.6rem; }
+  .rx-log__head > *:not(:first-child) { display: none; }
+  .rx-log__row {
+    grid-template-columns: 1fr;
+    gap: 0.45rem;
+    padding: 1.5rem 0;
+  }
+  .rx-log__cta { display: none; }
+  .rx-log__title { font-size: 1.3rem; }
+  .rx-missions { gap: 1rem; margin: 2.5rem auto 4rem; }
+  .rx-mr__head { padding: 2.25rem 1.5rem 2rem; }
+  .rx-mr__metrics { grid-template-columns: 1fr 1fr; }
+  .rx-article { padding: 2.5rem 1.25rem 3.5rem; }
+  .rx-article__title { font-size: 2rem; }
+}
+
+@media (max-width: 480px) {
+  .rx-mr__metrics { grid-template-columns: 1fr; }
+}
+
+/* ==========================================================================
+   11. Reduced motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .rx-bay,
+  .rx-mission,
+  .rx-log__row {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .rx-eyebrow__dot { animation: none; }
+  .rx-bay:hover,
+  .rx-mission:hover,
+  .rx-log__row:hover { transform: none; }
+}

@@ -15,9 +15,12 @@
   <meta name="description" content="Real SEO and GEO results. Traffic growth, rankings, and why AI started citing our clients." />
   <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="/style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/flight-trail.css" />
+  <link rel="stylesheet" href="/resources-design.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
   <link rel="canonical" href="https://theseopilot.pro/resources/case-studies/" />
   <script defer src="/script.js"></script>
+  <script defer src="/flight-trail.js"></script>
 </head>
 
 <body>
@@ -52,23 +55,27 @@
   </header>
 
   <main>
-    <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a href="/">Home</a> / <a href="/resources/">Resources</a> / Case Studies
-    </nav>
-    <section class="page-hero">
-      <div class="container">
-        <h1>Case Studies</h1>
-        <p>Real results from real clients. Search growth, traffic lifts, and why AI started citing them.</p>
+    <section class="rx-hero">
+      <div class="rx-hero__inner">
+        <span class="rx-eyebrow"><span class="rx-eyebrow__dot"></span>Mission Reports</span>
+        <h1 class="rx-hero__title">Search growth, <em>measured</em>.</h1>
+        <p class="rx-hero__subtitle">Real results from real clients. Traffic lifts, rankings, and why AI started citing them.</p>
+        <div class="rx-hero__meta">
+          <span>Synced from Contentful</span>
+          <span class="rx-hero__meta-divider"></span>
+          <span>Filed from the field</span>
+        </div>
       </div>
     </section>
-    <div class="container" style="padding: 2rem; max-width: 900px;">
-      <div class="case-study-card">
-        <a href="/resources/case-studies/aspora-ai-visibility/">
-          <h2>Aspora — From Rankings to AI Visibility</h2>
-          <p class="case-study-meta">Client: Aspora (aspora.com)</p>
-          <p class="case-study-metric">7.49M impressions · 89.1K clicks in 6 months</p>
-        </a>
-      </div>
+
+    <div class="rx-crumb__wrap">
+      <nav class="rx-crumb" aria-label="Breadcrumb">
+        <a href="/">Home</a><span class="rx-crumb__sep">›</span><a href="/resources/">Resources</a><span class="rx-crumb__sep">›</span><span>Case Studies</span>
+      </nav>
+    </div>
+
+    <div class="rx-missions" data-fp-stagger>
+      <div class="rx-log__empty">Case studies are synced from Contentful. Run <code>npm run generate</code> to build the listing, or add entries via the Page – Case Study content type.</div>
     </div>
   </main>
 

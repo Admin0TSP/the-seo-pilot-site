@@ -4,7 +4,7 @@
  * Architecture: Page – Blog Post, Page – Case Study; Component – SEO, Content Block, Result Block.
  *
  * - Blog listing + /resources/blog/{slug}/
- * - Case studies listing + /resources/case-studies/{slug}/ (includes static Aspora)
+ * - Case studies listing + /resources/case-studies/{slug}/ (100% Contentful-driven)
  *
  * Requires: CONTENTFUL_SPACE_ID, CONTENTFUL_ACCESS_TOKEN in .env
  * Run: npm run generate
@@ -151,10 +151,13 @@ function baseHead(title, description, canonical, opts = {}) {
   <meta name="description" content="${escapeHtml(description)}" />${robotsMeta}
   <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="/style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/flight-trail.css" />
+  <link rel="stylesheet" href="/resources-design.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
   <link rel="canonical" href="${escapeHtml(canonical)}" />
 ${ogBlock}${schemaJson ? '\n' + schemaJson : ''}
-  <script defer src="/script.js"></script>`;
+  <script defer src="/script.js"></script>
+  <script defer src="/flight-trail.js"></script>`;
 }
 
 async function fetchContentful(endpoint) {
@@ -176,7 +179,7 @@ function writeFile(filePath, content) {
 
 function resolveSeoRef(entry, includes, items = []) {
   const f = entry.fields || {};
-  const ref = unwrap(f.seoFields) || unwrap(f.seo);
+  const ref = unwrap(f.seoFields) || unwrap(f.seo) || unwrap(f.ogSeoFields) || unwrap(f.og_seo_fields);
   const id = ref && ref.sys && ref.sys.id;
   return id ? resolveEntry(id, includes, items) : null;
 }
@@ -188,25 +191,74 @@ function resolveAuthorRef(entry, includes, items = []) {
   return id ? resolveEntry(id, includes, items) : null;
 }
 
+/** Crumb component (white pill under hero) */
+function crumb(parts) {
+  // parts: [{ label, href? }, ...]
+  const items = parts.map((p, i) => {
+    const sep = i > 0 ? '<span class="rx-crumb__sep">›</span>' : '';
+    if (p.href) {
+      return `${sep}<a href="${escapeAttr(p.href)}">${escapeHtml(p.label)}</a>`;
+    }
+    return `${sep}<span>${escapeHtml(p.label)}</span>`;
+  }).join('');
+  return `    <div class="rx-crumb__wrap">
+      <nav class="rx-crumb" aria-label="Breadcrumb">${items}</nav>
+    </div>`;
+}
+
+/** Hero block — gold-accent runway grid */
+function rxHero(eyebrow, titleHtml, subtitle, meta) {
+  const metaHtml = meta ? `<div class="rx-hero__meta">${meta}</div>` : '';
+  return `    <section class="rx-hero">
+      <div class="rx-hero__inner">
+        <span class="rx-eyebrow"><span class="rx-eyebrow__dot"></span>${escapeHtml(eyebrow)}</span>
+        <h1 class="rx-hero__title">${titleHtml}</h1>
+        <p class="rx-hero__subtitle">${escapeHtml(subtitle)}</p>
+        ${metaHtml}
+      </div>
+    </section>`;
+}
+
+/** Format ISO date as YYYY · MMM */
+function formatLogDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '—';
+  const m = d.toLocaleString('en-US', { month: 'short' });
+  return `${d.getFullYear()} · ${m.toUpperCase()}`;
+}
+
 async function generateBlog(data) {
   const listing = data.items || [];
   const includes = data.includes || {};
 
-  const listHtml = listing
+  // Sort newest first by publishedDate (Contentful already orders, but keep deterministic)
+  const sortedListing = [...listing].sort((a, b) => {
+    const da = new Date(unwrap(a.fields?.publishedDate) || a.sys?.updatedAt || 0).getTime();
+    const db = new Date(unwrap(b.fields?.publishedDate) || b.sys?.updatedAt || 0).getTime();
+    return db - da;
+  });
+
+  const rows = sortedListing
     .map((it) => {
       const f = it.fields || {};
       const slug = unwrap(f.slug) || it.sys?.id || 'post';
       const title = unwrap(f.title) || 'Untitled';
       const subtitle = unwrap(f.subtitle) || '';
+      const date = formatLogDate(unwrap(f.publishedDate) || it.sys?.updatedAt);
       const href = `/resources/blog/${encodeURIComponent(slug)}/`;
-      return `
-      <article>
-        <h2><a href="${href}">${escapeHtml(title)}</a></h2>
-        <p>${escapeHtml(subtitle)}</p>
-        <a href="${href}">Read more →</a>
-      </article>`;
+      return `        <a class="rx-log__row" href="${href}">
+          <span class="rx-log__date">${escapeHtml(date)}</span>
+          <div class="rx-log__body">
+            <h2 class="rx-log__title">${escapeHtml(title)}</h2>
+            ${subtitle ? `<p class="rx-log__sub">${escapeHtml(subtitle)}</p>` : ''}
+          </div>
+          <span class="rx-log__cta">Read →</span>
+        </a>`;
     })
     .join('\n');
+
+  const emptyRow = `        <div class="rx-log__empty">No flight logs yet. Add <strong>Page – Blog Post</strong> entries in Contentful (content type: ${escapeHtml(BLOG_CT)}).</div>`;
 
   const blogIndex = `<!DOCTYPE html>
 <html lang="en">
@@ -218,17 +270,15 @@ ${baseHead('Blog — SEO & GEO Insights | TheSEOPilot', 'SEO and Generative Engi
 ${gtmBody()}
 ${header()}
   <main>
-    <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a href="/">Home</a> / <a href="/resources/">Resources</a> / Blog
-    </nav>
-    <section class="page-hero">
-      <div class="container">
-        <h1>SEO & AI Visibility Insights</h1>
-        <p>Practical guides on search visibility, Generative Engine Optimization, and content that ranks—and gets cited.</p>
+${rxHero('Flight Logs', 'SEO &amp; <em>AI Visibility</em> Insights', 'Practical guides on search visibility, Generative Engine Optimization, and content that ranks — and gets cited.', `<span>${sortedListing.length.toString().padStart(2,'0')} ENTRIES</span><span class="rx-hero__meta-divider"></span><span>Updated weekly</span>`)}
+${crumb([{label:'Home',href:'/'},{label:'Resources',href:'/resources/'},{label:'Blog'}])}
+    <div class="rx-log" data-fp-stagger>
+      <div class="rx-log__head">
+        <span>Date</span>
+        <span>Title</span>
+        <span style="text-align:right;">Action</span>
       </div>
-    </section>
-    <div id="blogList" class="blog-list container">
-      ${listHtml || `<p style="text-align:center;color:var(--muted);">No posts yet. Add <strong>Page – Blog Post</strong> entries in Contentful (content type: ${BLOG_CT}).</p>`}
+${rows || emptyRow}
     </div>
   </main>
 ${footer()}
@@ -238,7 +288,7 @@ ${footer()}
   writeFile(path.join(ROOT, 'resources', 'blog', 'index.html'), blogIndex);
 
   const apiItems = data.items || [];
-  for (const it of listing) {
+  for (const it of sortedListing) {
     const f = it.fields || {};
     const slug = unwrap(f.slug) || it.sys?.id || 'post';
     const title = unwrap(f.title) || 'Untitled';
@@ -284,7 +334,7 @@ ${footer()}
     const authorEntry = resolveAuthorRef(it, includes, apiItems);
     const author = getAuthor(authorEntry, includes);
     const authorHtml = author
-      ? `<div class="blog-author"><div class="blog-author-inner">${author.avatarUrl ? `<img src="${escapeAttr(author.avatarUrl)}" alt="" class="blog-author-avatar" loading="lazy" />` : ''}<div><span class="blog-author-name">${escapeHtml(author.name)}</span>${author.roleCompany ? `<span class="blog-author-role">${escapeHtml(author.roleCompany)}</span>` : ''}${author.bio ? `<p class="blog-author-bio">${escapeHtml(author.bio)}</p>` : ''}</div></div></div>`
+      ? `<div class="rx-article__author">${author.avatarUrl ? `<img src="${escapeAttr(author.avatarUrl)}" alt="" loading="lazy" />` : ''}<span class="rx-article__author-name">${escapeHtml(author.name)}</span></div>`
       : '';
 
     const featuredImageUrl = getFeaturedImageUrl(it, includes);
@@ -292,7 +342,7 @@ ${footer()}
 
     const publishedDateRaw = unwrap(f.publishedDate) || '';
     const publishedDateFormatted = formatPublishedDate(publishedDateRaw);
-    const publishedDateHtml = publishedDateFormatted ? `<time class="blog-published-date" datetime="${escapeAttr(publishedDateRaw)}">${escapeHtml(publishedDateFormatted)}</time>` : '';
+    const publishedDateHtml = publishedDateFormatted ? `<time datetime="${escapeAttr(publishedDateRaw)}">${escapeHtml(publishedDateFormatted)}</time>` : '';
 
     const faqsFieldIds = (process.env.CONTENTFUL_FAQS_FIELD || 'faqs').split(',').map((s) => s.trim()).filter(Boolean);
     let faqsRich = null;
@@ -304,7 +354,7 @@ ${footer()}
       }
     }
     const faqsHtml = faqsRich && faqsRich.content && faqsRich.content.length
-      ? `<section class="blog-faqs" aria-labelledby="faqs-heading"><h2 id="faqs-heading" class="faqs-heading">Frequently Asked Questions</h2><div class="faq-content blog-content">${richTextToHtml(faqsRich, includes, apiItems)}</div></section>`
+      ? `<section class="rx-faq" aria-labelledby="faqs-heading"><h2 id="faqs-heading" class="rx-faq__title">Frequently Asked Questions</h2><div class="blog-content rx-article__body">${richTextToHtml(faqsRich, includes, apiItems)}</div></section>`
       : '';
 
     // Extract FAQ pairs for FAQPage schema
@@ -351,7 +401,10 @@ ${footer()}
     };
     headOpts.schemaJson = articleSchema;
 
-    const metaRow = [publishedDateHtml, authorHtml].filter(Boolean).join('');
+    const metaParts = [];
+    if (publishedDateHtml) metaParts.push(publishedDateHtml);
+    if (authorHtml) metaParts.push(authorHtml);
+    const metaJoined = metaParts.join('<span class="rx-article__meta-dot"></span>');
 
     const postHtml = `<!DOCTYPE html>
 <html lang="en">
@@ -362,20 +415,19 @@ ${baseHead(seoTitle + ' | TheSEOPilot', seoDescription, canonical, headOpts)}
 <body>
 ${gtmBody()}
 ${header()}
-  <main class="case-study-page blog-post-page">
-    <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a href="/">Home</a> / <a href="/resources/">Resources</a> / <a href="/resources/blog/">Blog</a> / ${escapeHtml(title)}
-    </nav>
-    <div class="container blog-post-container">
-      <h1 class="blog-post-title">${escapeHtml(title)}</h1>
-      ${subtitle ? `<p class="blog-post-subtitle">${escapeHtml(subtitle)}</p>` : ''}
-      ${featuredImageAbsolute ? `<figure class="blog-featured-image"><img src="${escapeAttr(featuredImageAbsolute)}" alt="${escapeAttr(title)}" loading="eager" /></figure>` : ''}
-      <div class="blog-meta-row">${metaRow}</div>
-      <div class="legal-page blog-content-wrapper">
-        <div class="blog-content">${body || '<p class="blog-content-empty">No content yet.</p>'}</div>
-      </div>
-      ${faqsHtml}
-    </div>
+  <main>
+${crumb([{label:'Home',href:'/'},{label:'Resources',href:'/resources/'},{label:'Blog',href:'/resources/blog/'},{label:title}])}
+    <article class="rx-article">
+      <header class="rx-article__head">
+        <span class="rx-article__kicker">Field Notes</span>
+        <h1 class="rx-article__title">${escapeHtml(title)}</h1>
+        ${subtitle ? `<p class="rx-article__subtitle">${escapeHtml(subtitle)}</p>` : ''}
+        ${metaJoined ? `<div class="rx-article__meta">${metaJoined}</div>` : ''}
+      </header>
+      ${featuredImageAbsolute ? `<figure class="rx-article__featured"><img src="${escapeAttr(featuredImageAbsolute)}" alt="${escapeAttr(title)}" loading="eager" /></figure>` : ''}
+      <div class="rx-article__body blog-content">${body || '<p style="color:var(--rx-mute);font-style:italic;">No content yet.</p>'}</div>
+    </article>
+    ${faqsHtml}
   </main>
 ${footer()}
 </body>
@@ -386,51 +438,107 @@ ${footer()}
   }
 }
 
+/**
+ * Try to surface up to N "headline" metrics from a case study entry for the
+ * mission report dashboard. Sources, in order: keyMetrics JSON, Result Block refs.
+ */
+function buildCaseStudyMetrics(entry, includes, items = []) {
+  const f = entry.fields || {};
+  const results = [];
+
+  // 1. keyMetrics JSON ({ "label": "value" } or [{label, value}])
+  const km = unwrap(f.keyMetrics) || unwrap(f.key_metrics);
+  if (km && typeof km === 'object') {
+    if (Array.isArray(km)) {
+      for (const item of km) {
+        if (!item) continue;
+        if (typeof item === 'object') {
+          const label = item.label || item.metricLabel || item.name || '';
+          const value = item.value || item.metricValue || item.amount || '';
+          if (label || value) results.push({ label: String(label), value: String(value) });
+        }
+      }
+    } else {
+      for (const [label, value] of Object.entries(km)) {
+        if (value == null) continue;
+        results.push({ label: String(label), value: String(value) });
+      }
+    }
+  }
+
+  // 2. Result Block references (legacy / supplementary)
+  if (results.length < 3) {
+    const refs = unwrap(f.resultsBlocks) || unwrap(f.results_blocks) || [];
+    if (Array.isArray(refs)) {
+      for (const ref of refs) {
+        const id = ref && ref.sys && ref.sys.id;
+        if (!id) continue;
+        const rb = resolveEntry(id, includes, items);
+        if (!rb || !rb.fields) continue;
+        const label = unwrap(rb.fields.metricLabel) || unwrap(rb.fields.metric_label) || '';
+        const value = unwrap(rb.fields.metricValue) || unwrap(rb.fields.metric_value) || '';
+        if (label || value) results.push({ label: String(label), value: String(value) });
+        if (results.length >= 4) break;
+      }
+    }
+  }
+
+  return results.slice(0, 4);
+}
+
+/** Render a rich-text or plain-text field as HTML. */
+function renderRichOrText(val, includes, items) {
+  if (!val) return '';
+  if (typeof val === 'string') return `<p>${escapeHtml(val)}</p>`;
+  if (typeof val === 'object' && (val.nodeType === 'document' || Array.isArray(val.content))) {
+    return richTextToHtml(val, includes, items);
+  }
+  return '';
+}
+
 async function generateCaseStudies(data) {
   const listing = data.items || [];
   const includes = data.includes || {};
+  const apiItems = data.items || [];
+
   const cards = [];
 
-  const aspora = {
-    slug: 'aspora-ai-visibility',
-    title: 'Aspora — From Rankings to AI Visibility',
-    client: 'Aspora (aspora.com)',
-    metric: '7.49M impressions · 89.1K clicks in 6 months',
-  };
-  cards.push(`      <div class="case-study-card">
-        <a href="/resources/case-studies/aspora-ai-visibility/">
-          <h2>${escapeHtml(aspora.title)}</h2>
-          <p class="case-study-meta">Client: ${escapeHtml(aspora.client)}</p>
-          <p class="case-study-metric">${escapeHtml(aspora.metric)}</p>
-        </a>
-      </div>`);
+  // Sort by updatedAt desc (Contentful returns this order already, but be explicit).
+  const sorted = [...listing].sort((a, b) => {
+    const da = new Date(a.sys?.updatedAt || 0).getTime();
+    const db = new Date(b.sys?.updatedAt || 0).getTime();
+    return db - da;
+  });
 
-  for (const it of listing) {
+  for (const it of sorted) {
     const f = it.fields || {};
-    const slug = unwrap(f.slug) || it.sys?.id;
+    const slug = unwrap(f.slug) || unwrap(f.adminSlug) || it.sys?.id;
     if (!slug) continue;
-    const clientName = unwrap(f.clientName) || 'Case Study';
+    const clientName = unwrap(f.clientName) || unwrap(f.client_name) || 'Case Study';
+    const h1 = unwrap(f.h1) || '';
     const industry = unwrap(f.industry) || '';
-    const resultsBlocks = unwrap(f.resultsBlocks) || [];
-    const firstResult = resultsBlocks[0];
-    let metric = unwrap(f.keyMetrics) || '';
-    if (!metric && firstResult && firstResult.sys && firstResult.sys.id) {
-      const rb = resolveEntry(firstResult.sys.id, includes, data.items || []);
-      if (rb && rb.fields) {
-        const v = unwrap(rb.fields.metricValue);
-        const l = unwrap(rb.fields.metricLabel);
-        if (v || l) metric = [v, l].filter(Boolean).join(' ');
-      }
-    }
+    const timeframe = unwrap(f.contextTimeframe) || unwrap(f.context_timeframe) || '';
+    const metrics = buildCaseStudyMetrics(it, includes, apiItems);
+    const topMetric = metrics[0];
+
     const href = `/resources/case-studies/${encodeURIComponent(slug)}/`;
-    cards.push(`      <div class="case-study-card">
-        <a href="${href}">
-          <h2>${escapeHtml(clientName)}</h2>
-          <p class="case-study-meta">${industry ? escapeHtml(industry) + ' · ' : ''}Case study</p>
-          <p class="case-study-metric">${escapeHtml(metric)}</p>
-        </a>
-      </div>`);
+    const displayTitle = h1 || clientName;
+    cards.push(`        <a class="rx-mission" href="${href}">
+          <div class="rx-mission__top">
+            <span class="rx-mission__industry">${escapeHtml(industry || 'Case Study')}</span>
+            ${timeframe ? `<span class="rx-mission__timeframe">${escapeHtml(timeframe)}</span>` : ''}
+          </div>
+          <h2 class="rx-mission__title">${escapeHtml(displayTitle)}</h2>
+          <p class="rx-mission__client">${escapeHtml(clientName)}</p>
+          ${topMetric ? `<div class="rx-mission__metric">
+            <span class="rx-mission__metric-value">${escapeHtml(topMetric.value || '')}</span>
+            <span class="rx-mission__metric-label">${escapeHtml(topMetric.label || '')}</span>
+          </div>` : ''}
+          <span class="rx-mission__cta">Read mission report</span>
+        </a>`);
   }
+
+  const emptyCards = `        <div class="rx-log__empty">No mission reports yet. Add <strong>Page – Case Study</strong> entries in Contentful (content type: ${escapeHtml(CASE_STUDY_CT)}).</div>`;
 
   const csIndex = `<!DOCTYPE html>
 <html lang="en">
@@ -442,17 +550,10 @@ ${baseHead('Case Studies | TheSEOPilot', 'Real SEO and GEO results. Traffic grow
 ${gtmBody()}
 ${header()}
   <main>
-    <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a href="/">Home</a> / <a href="/resources/">Resources</a> / Case Studies
-    </nav>
-    <section class="page-hero">
-      <div class="container">
-        <h1>Case Studies</h1>
-        <p>Real results from real clients. Search growth, traffic lifts, and why AI started citing them.</p>
-      </div>
-    </section>
-    <div class="container" style="padding: 2rem; max-width: 900px;">
-${cards.join('\n')}
+${rxHero('Mission Reports', 'Search growth, <em>measured</em>.', 'Real results from real clients. Traffic lifts, rankings, and why AI started citing them.', `<span>${sorted.length.toString().padStart(2,'0')} REPORTS</span><span class="rx-hero__meta-divider"></span><span>Filed from the field</span>`)}
+${crumb([{label:'Home',href:'/'},{label:'Resources',href:'/resources/'},{label:'Case Studies'}])}
+    <div class="rx-missions" data-fp-stagger>
+${cards.join('\n') || emptyCards}
     </div>
   </main>
 ${footer()}
@@ -461,36 +562,100 @@ ${footer()}
 
   writeFile(path.join(ROOT, 'resources', 'case-studies', 'index.html'), csIndex);
 
-  for (const it of listing) {
+  for (const it of sorted) {
     const f = it.fields || {};
-    const slug = unwrap(f.slug) || it.sys?.id;
+    const slug = unwrap(f.slug) || unwrap(f.adminSlug) || it.sys?.id;
     if (!slug) continue;
-    const clientName = unwrap(f.clientName) || 'Case Study';
-    const challenge = unwrap(f.challenge) || '';
-    const strategy = unwrap(f.strategy);
-    const resultsBlocks = unwrap(f.resultsBlocks) || [];
-    const resultsHtml = buildResultsFromResultBlocks(resultsBlocks, includes, data.items || []);
+    const clientName = unwrap(f.clientName) || unwrap(f.client_name) || 'Case Study';
+    const h1 = unwrap(f.h1) || '';
+    const industry = unwrap(f.industry) || '';
+    const timeframe = unwrap(f.contextTimeframe) || unwrap(f.context_timeframe) || '';
 
-    let strategyHtml = '';
-    if (strategy) {
-      if (typeof strategy === 'object' && strategy.content) {
-        strategyHtml = richTextToHtml(strategy, includes, data.items || []);
-      } else {
-        strategyHtml = escapeHtml(String(strategy));
+    const challenge = unwrap(f.challenge);
+    const strategy = unwrap(f.strategy);
+    // New schema: 'result' (singular, Rich text). Backward compat: results (rich) or resultsBlocks (refs).
+    const resultsRich = unwrap(f.result) || unwrap(f.results);
+    const purpose = unwrap(f.purpose);
+
+    const challengeHtml = renderRichOrText(challenge, includes, apiItems);
+    const strategyHtml = renderRichOrText(strategy, includes, apiItems);
+    let resultsHtml = renderRichOrText(resultsRich, includes, apiItems);
+    if (!resultsHtml) {
+      // Fallback: legacy reference array
+      const legacyRefs = unwrap(f.resultsBlocks) || unwrap(f.results_blocks);
+      if (Array.isArray(legacyRefs)) {
+        resultsHtml = buildResultsFromResultBlocks(legacyRefs, includes, apiItems);
       }
     }
+    const purposeHtml = renderRichOrText(purpose, includes, apiItems);
 
-    const seoEntry = resolveSeoRef(it, includes, data.items || []);
+    const metrics = buildCaseStudyMetrics(it, includes, apiItems);
+
+    const featuredImageUrl = getFeaturedImageUrl(it, includes);
+    const featuredImageAbsolute = featuredImageUrl ? (featuredImageUrl.startsWith('//') ? 'https:' + featuredImageUrl : featuredImageUrl) : '';
+
+    const seoEntry = resolveSeoRef(it, includes, apiItems);
     const seo = getSeo(seoEntry, includes);
-    const seoTitle = seo.pageTitle || clientName;
-    const seoDescription = seo.pageDescription || (challenge ? challenge.replace(/<[^>]+>/g, '').slice(0, 160) + '…' : '');
+    const seoTitle = seo.pageTitle || h1 || clientName;
+    const challengePlain = challengeHtml ? challengeHtml.replace(/<[^>]+>/g, '').slice(0, 160) : '';
+    const seoDescription = seo.pageDescription || (challengePlain ? challengePlain + '…' : `Case study: ${clientName}`);
     const canonical = seo.canonicalUrl || `${BASE}/resources/case-studies/${encodeURIComponent(slug)}/`;
-    const seoShareImage = (seo.shareImages && seo.shareImages[0]) || '';
+    const seoShareImage = (seo.shareImages && seo.shareImages[0]) || featuredImageAbsolute;
 
-    const csHeadOpts = {};
+    const csHeadOpts = { ogType: 'article' };
     if (seoShareImage) csHeadOpts.ogImage = seoShareImage;
     if (seo.noindex) csHeadOpts.noindex = true;
     if (seo.nofollow) csHeadOpts.nofollow = true;
+
+    // Schema.org Article + BreadcrumbList
+    const csSchema = {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'Article',
+          headline: h1 || clientName,
+          description: seoDescription,
+          url: canonical,
+          dateModified: it.sys?.updatedAt || undefined,
+          author: { '@type': 'Organization', name: 'TheSEOPilot' },
+          publisher: { '@type': 'Organization', name: 'TheSEOPilot', logo: { '@type': 'ImageObject', url: BASE + '/assets/img/logo-footer.webp' } },
+          ...(seoShareImage && { image: seoShareImage }),
+        },
+        {
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: BASE + '/' },
+            { '@type': 'ListItem', position: 2, name: 'Resources', item: BASE + '/resources/' },
+            { '@type': 'ListItem', position: 3, name: 'Case Studies', item: BASE + '/resources/case-studies/' },
+            { '@type': 'ListItem', position: 4, name: h1 || clientName, item: canonical },
+          ],
+        },
+      ],
+    };
+    csHeadOpts.schemaJson = csSchema;
+
+    const metricsHtml = metrics.length
+      ? `<div class="rx-mr__metrics">${metrics.map((m) => `<div class="rx-mr__metric"><span class="rx-mr__metric-value">${escapeHtml(m.value || '')}</span><span class="rx-mr__metric-label">${escapeHtml(m.label || '')}</span></div>`).join('')}</div>`
+      : '';
+
+    const tagsHtml = `<div class="rx-mr__tags">
+        ${industry ? `<span class="rx-mr__tag">${escapeHtml(industry)}</span>` : ''}
+        ${timeframe ? `<span class="rx-mr__tag rx-mr__tag--muted">${escapeHtml(timeframe)}</span>` : ''}
+      </div>`;
+
+    const sections = [];
+    if (purposeHtml) {
+      sections.push(`      <section class="rx-mr__section"><span class="rx-mr__label">Purpose</span><div class="rx-mr__body">${purposeHtml}</div></section>`);
+    }
+    if (challengeHtml) {
+      sections.push(`      <section class="rx-mr__section"><span class="rx-mr__label">The Challenge</span><h2 class="rx-mr__heading">What we were up against</h2><div class="rx-mr__body">${challengeHtml}</div></section>`);
+    }
+    if (strategyHtml) {
+      sections.push(`      <section class="rx-mr__section"><span class="rx-mr__label">The Strategy</span><h2 class="rx-mr__heading">How we flew the route</h2><div class="rx-mr__body">${strategyHtml}</div></section>`);
+    }
+    if (resultsHtml) {
+      sections.push(`      <section class="rx-mr__section"><span class="rx-mr__label">The Results</span><h2 class="rx-mr__heading">Where we landed</h2><div class="rx-mr__body">${resultsHtml}</div></section>`);
+    }
 
     const studyHtml = `<!DOCTYPE html>
 <html lang="en">
@@ -501,15 +666,19 @@ ${baseHead(seoTitle + ' | TheSEOPilot', seoDescription, canonical, csHeadOpts)}
 <body>
 ${gtmBody()}
 ${header()}
-  <main class="case-study-page">
-    <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a href="/">Home</a> / <a href="/resources/">Resources</a> / <a href="/resources/case-studies/">Case Studies</a> / ${escapeHtml(clientName)}
-    </nav>
-    <div class="container" style="padding-top:1rem;">
-      <h1 style="margin-bottom:1rem;">${escapeHtml(clientName)}</h1>
-      <section><h2>The Challenge</h2><div class="legal-page"><p>${escapeHtml(challenge)}</p></div></section>
-      <section><h2>The Strategy</h2><div class="legal-page">${strategyHtml || ''}</div></section>
-      <section><h2>The Results</h2><div class="legal-page">${resultsHtml || ''}</div></section>
+  <main>
+${crumb([{label:'Home',href:'/'},{label:'Resources',href:'/resources/'},{label:'Case Studies',href:'/resources/case-studies/'},{label:clientName}])}
+    <div class="rx-mr">
+      <header class="rx-mr__head">
+        <div class="rx-mr__head-inner">
+          ${tagsHtml}
+          <h1 class="rx-mr__title">${escapeHtml(h1 || clientName)}</h1>
+          <p class="rx-mr__client">Client · ${escapeHtml(clientName)}</p>
+          ${metricsHtml}
+        </div>
+      </header>
+      ${featuredImageAbsolute ? `<figure class="rx-article__featured" style="margin-bottom:2.5rem;"><img src="${escapeAttr(featuredImageAbsolute)}" alt="${escapeAttr(clientName)}" loading="eager" /></figure>` : ''}
+${sections.join('\n')}
     </div>
   </main>
 ${footer()}
@@ -543,6 +712,9 @@ async function main() {
     console.log(`Generated Resources: ${nBlog} blog posts, ${nCs} case studies.`);
     if (nBlog === 0) {
       console.warn(`No Page – Blog Post entries found. Check that CONTENTFUL_BLOG_CONTENT_TYPE (${BLOG_CT}) matches your content type API ID in Contentful.`);
+    }
+    if (nCs === 0) {
+      console.warn(`No Page – Case Study entries found. Check that CONTENTFUL_CASE_STUDY_CONTENT_TYPE (${CASE_STUDY_CT}) matches your content type API ID in Contentful.`);
     }
   } catch (e) {
     console.error('Generate failed:', e.message);

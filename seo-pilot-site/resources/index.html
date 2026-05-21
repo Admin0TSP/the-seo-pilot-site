@@ -20,9 +20,12 @@
   <meta name="twitter:card" content="summary" />
   <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="/style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/flight-trail.css" />
+  <link rel="stylesheet" href="/resources-design.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
   <link rel="canonical" href="https://theseopilot.pro/resources/" />
   <script defer src="/script.js"></script>
+  <script defer src="/flight-trail.js"></script>
 </head>
 
 <body>
@@ -57,23 +60,38 @@
   </header>
 
   <main>
-    <section class="page-hero">
-      <div class="container">
-        <h1>Resources</h1>
-        <p>SEO & AI visibility insights, guides, and proof from the field. Built for search, tuned for GEO.</p>
+    <section class="rx-hero">
+      <div class="rx-hero__inner">
+        <span class="rx-eyebrow"><span class="rx-eyebrow__dot"></span>Flight Library</span>
+        <h1 class="rx-hero__title">Resources for the <em>climb</em>.</h1>
+        <p class="rx-hero__subtitle">SEO &amp; AI visibility insights, guides, and proof from the field. Built for search, tuned for GEO.</p>
+        <div class="rx-hero__meta">
+          <span>02 BAYS</span>
+          <span class="rx-hero__meta-divider"></span>
+          <span>Updated continuously</span>
+        </div>
       </div>
     </section>
-    <div class="resources-grid">
-      <div class="resource-card">
-        <h2>Blog</h2>
-        <p>SEO and Generative Engine Optimization insights—how to rank, get cited by AI, and grow organic visibility.</p>
-        <a href="/resources/blog/">Explore articles →</a>
-      </div>
-      <div class="resource-card">
-        <h2>Case Studies</h2>
-        <p>Real results from real clients. Traffic growth, rankings, and why AI started citing them.</p>
-        <a href="/resources/case-studies/">View case studies →</a>
-      </div>
+
+    <div class="rx-crumb__wrap">
+      <nav class="rx-crumb" aria-label="Breadcrumb">
+        <a href="/">Home</a><span class="rx-crumb__sep">›</span><span>Resources</span>
+      </nav>
+    </div>
+
+    <div class="rx-hub" data-fp-stagger>
+      <a href="/resources/blog/" class="rx-bay" style="text-decoration:none;color:inherit;">
+        <span class="rx-bay__code">Bay 01 · Flight Logs</span>
+        <h2 class="rx-bay__title">Blog</h2>
+        <p class="rx-bay__desc">SEO and Generative Engine Optimization insights — how to rank, get cited by AI, and grow organic visibility.</p>
+        <span class="rx-bay__link">Explore articles</span>
+      </a>
+      <a href="/resources/case-studies/" class="rx-bay" style="text-decoration:none;color:inherit;">
+        <span class="rx-bay__code">Bay 02 · Mission Reports</span>
+        <h2 class="rx-bay__title">Case Studies</h2>
+        <p class="rx-bay__desc">Real results from real clients. Traffic growth, rankings, and why AI started citing them.</p>
+        <span class="rx-bay__link">View case studies</span>
+      </a>
     </div>
   </main>
 

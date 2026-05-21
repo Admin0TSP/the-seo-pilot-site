@@ -15,9 +15,12 @@
   <meta name="description" content="SEO and Generative Engine Optimization insights. How to rank, get cited by AI, and grow organic visibility." />
   <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="/style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/flight-trail.css" />
+  <link rel="stylesheet" href="/resources-design.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
   <link rel="canonical" href="https://theseopilot.pro/resources/blog/" />
   <script defer src="/script.js"></script>
+  <script defer src="/flight-trail.js"></script>
 </head>
 
 <body>
@@ -52,17 +55,32 @@
   </header>
 
   <main>
-    <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a href="/">Home</a> / <a href="/resources/">Resources</a> / Blog
-    </nav>
-    <section class="page-hero">
-      <div class="container">
-        <h1>SEO & AI Visibility Insights</h1>
-        <p>Practical guides on search visibility, Generative Engine Optimization, and content that ranks—and gets cited.</p>
+    <section class="rx-hero">
+      <div class="rx-hero__inner">
+        <span class="rx-eyebrow"><span class="rx-eyebrow__dot"></span>Flight Logs</span>
+        <h1 class="rx-hero__title">SEO &amp; <em>AI Visibility</em> Insights</h1>
+        <p class="rx-hero__subtitle">Practical guides on search visibility, Generative Engine Optimization, and content that ranks — and gets cited.</p>
+        <div class="rx-hero__meta">
+          <span>Synced from Contentful</span>
+          <span class="rx-hero__meta-divider"></span>
+          <span>Updated weekly</span>
+        </div>
       </div>
     </section>
-    <div id="blogList" class="blog-list container">
-      <p style="text-align:center;color:var(--muted);">Articles are synced from Contentful. Run <code>npm run generate</code> to build the blog, or add posts via the generator.</p>
+
+    <div class="rx-crumb__wrap">
+      <nav class="rx-crumb" aria-label="Breadcrumb">
+        <a href="/">Home</a><span class="rx-crumb__sep">›</span><a href="/resources/">Resources</a><span class="rx-crumb__sep">›</span><span>Blog</span>
+      </nav>
+    </div>
+
+    <div id="blogList" class="rx-log" data-fp-stagger>
+      <div class="rx-log__head">
+        <span>Date</span>
+        <span>Title</span>
+        <span style="text-align:right;">Action</span>
+      </div>
+      <div class="rx-log__empty">Articles are synced from Contentful. Run <code>npm run generate</code> to build the blog, or add posts via the Page – Blog Post content type.</div>
     </div>
   </main>
 
