@@ -49,7 +49,6 @@ function nav() {
   return `
       <nav class="desktop-nav">
         <a href="/#services">Services</a>
-        <a href="/#workflow">Process</a>
         <a href="/#about">About</a>
         <div class="nav-item nav-item--has-sub">
           <a href="/resources/" aria-haspopup="true" aria-expanded="false">Resources</a>
@@ -64,7 +63,6 @@ function nav() {
     </div>
     <div class="mobile-nav" id="mobileNav">
       <a href="/#services">Services</a>
-      <a href="/#workflow">Process</a>
       <a href="/#about">About</a>
       <a href="/resources/">Resources</a>
       <div class="mobile-subnav">
