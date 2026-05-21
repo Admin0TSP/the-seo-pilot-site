@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <!-- Google Tag Manager -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -11,7 +10,7 @@
   <!-- End Google Tag Manager -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Blog — SEO & GEO Insights | TheSEOPilot</title>
+  <title>Blog — SEO &amp; GEO Insights | TheSEOPilot</title>
   <meta name="description" content="SEO and Generative Engine Optimization insights. How to rank, get cited by AI, and grow organic visibility." />
   <link rel="icon" href="/assets/img/favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="/style.css" />
@@ -19,10 +18,16 @@
   <link rel="stylesheet" href="/resources-design.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
   <link rel="canonical" href="https://theseopilot.pro/resources/blog/" />
+  <meta property="og:title" content="Blog — SEO &amp; GEO Insights | TheSEOPilot" />
+  <meta property="og:description" content="SEO and Generative Engine Optimization insights. How to rank, get cited by AI, and grow organic visibility." />
+  <meta property="og:url" content="https://theseopilot.pro/resources/blog/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Blog — SEO &amp; GEO Insights | TheSEOPilot" />
+  <meta name="twitter:description" content="SEO and Generative Engine Optimization insights. How to rank, get cited by AI, and grow organic visibility." />
   <script defer src="/script.js"></script>
   <script defer src="/flight-trail.js"></script>
 </head>
-
 <body>
   <!-- Google Tag Manager (noscript) -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5ZTWCD2L"
@@ -40,7 +45,13 @@
         <a href="/#services">Services</a>
         <a href="/#workflow">Process</a>
         <a href="/#about">About</a>
-        <a href="/resources/">Resources</a>
+        <div class="nav-item nav-item--has-sub">
+          <a href="/resources/" aria-haspopup="true" aria-expanded="false">Resources</a>
+          <div class="nav-submenu" role="menu" aria-label="Resources">
+            <a href="/resources/blog/" role="menuitem"><span class="nav-submenu__label">Blog</span><span class="nav-submenu__hint">Field notes</span></a>
+            <a href="/resources/case-studies/" role="menuitem"><span class="nav-submenu__label">Case Studies</span><span class="nav-submenu__hint">Proof in numbers</span></a>
+          </div>
+        </div>
         <a href="/#contact" class="nav-cta">Get Started</a>
       </nav>
       <div class="hamburger" onclick="toggleMenu()">☰</div>
@@ -50,31 +61,26 @@
       <a href="/#workflow">Process</a>
       <a href="/#about">About</a>
       <a href="/resources/">Resources</a>
+      <div class="mobile-subnav">
+        <a href="/resources/blog/">— Blog</a>
+        <a href="/resources/case-studies/">— Case Studies</a>
+      </div>
       <a href="/#contact">Get Started</a>
     </div>
   </header>
-
   <main>
     <section class="rx-hero">
       <div class="rx-hero__inner">
         <span class="rx-eyebrow"><span class="rx-eyebrow__dot"></span>Flight Logs</span>
         <h1 class="rx-hero__title">SEO &amp; <em>AI Visibility</em> Insights</h1>
         <p class="rx-hero__subtitle">Practical guides on search visibility, Generative Engine Optimization, and content that ranks — and gets cited.</p>
-        <div class="rx-hero__meta">
-          <span>Synced from Contentful</span>
-          <span class="rx-hero__meta-divider"></span>
-          <span>Updated weekly</span>
-        </div>
+        <div class="rx-hero__meta"><span>01 ENTRIES</span><span class="rx-hero__meta-divider"></span><span>Updated weekly</span></div>
       </div>
     </section>
-
     <div class="rx-crumb__wrap">
-      <nav class="rx-crumb" aria-label="Breadcrumb">
-        <a href="/">Home</a><span class="rx-crumb__sep">›</span><a href="/resources/">Resources</a><span class="rx-crumb__sep">›</span><span>Blog</span>
-      </nav>
+      <nav class="rx-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="rx-crumb__sep">›</span><a href="/resources/">Resources</a><span class="rx-crumb__sep">›</span><span>Blog</span></nav>
     </div>
-
-    <div id="blogList" class="rx-log" data-fp-stagger>
+    <div class="rx-log" data-fp-stagger>
       <div class="rx-log__head">
         <span>Date</span>
         <span>Title</span>
@@ -83,7 +89,6 @@
       <div class="rx-log__empty">Articles are synced from Contentful. Run <code>npm run generate</code> to build the blog, or add posts via the Page – Blog Post content type.</div>
     </div>
   </main>
-
   <footer class="site-footer">
     <div class="container footer-content">
       <div class="footer-brand">
@@ -108,5 +113,4 @@
     <p>&copy; 2025 TheSEOPilot. All rights reserved.</p>
   </div>
 </body>
-
 </html>

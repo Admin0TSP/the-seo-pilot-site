@@ -174,10 +174,15 @@
 
 .rx-crumb__wrap {
   max-width: 1100px;
-  margin: -1.75rem auto 0;
+  margin: 1.5rem auto 0;
   padding: 0 1.5rem;
   position: relative;
   z-index: 2;
+}
+
+/* When the crumb sits directly under a hero, lift its pill onto the hero edge */
+.rx-hero + .rx-crumb__wrap {
+  margin-top: -1.75rem;
 }
 
 .rx-crumb a {

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <!-- Google Tag Manager -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -19,10 +18,16 @@
   <link rel="stylesheet" href="/resources-design.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
   <link rel="canonical" href="https://theseopilot.pro/resources/case-studies/" />
+  <meta property="og:title" content="Case Studies | TheSEOPilot" />
+  <meta property="og:description" content="Real SEO and GEO results. Traffic growth, rankings, and why AI started citing our clients." />
+  <meta property="og:url" content="https://theseopilot.pro/resources/case-studies/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Case Studies | TheSEOPilot" />
+  <meta name="twitter:description" content="Real SEO and GEO results. Traffic growth, rankings, and why AI started citing our clients." />
   <script defer src="/script.js"></script>
   <script defer src="/flight-trail.js"></script>
 </head>
-
 <body>
   <!-- Google Tag Manager (noscript) -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5ZTWCD2L"
@@ -40,7 +45,13 @@
         <a href="/#services">Services</a>
         <a href="/#workflow">Process</a>
         <a href="/#about">About</a>
-        <a href="/resources/">Resources</a>
+        <div class="nav-item nav-item--has-sub">
+          <a href="/resources/" aria-haspopup="true" aria-expanded="false">Resources</a>
+          <div class="nav-submenu" role="menu" aria-label="Resources">
+            <a href="/resources/blog/" role="menuitem"><span class="nav-submenu__label">Blog</span><span class="nav-submenu__hint">Field notes</span></a>
+            <a href="/resources/case-studies/" role="menuitem"><span class="nav-submenu__label">Case Studies</span><span class="nav-submenu__hint">Proof in numbers</span></a>
+          </div>
+        </div>
         <a href="/#contact" class="nav-cta">Get Started</a>
       </nav>
       <div class="hamburger" onclick="toggleMenu()">☰</div>
@@ -50,35 +61,29 @@
       <a href="/#workflow">Process</a>
       <a href="/#about">About</a>
       <a href="/resources/">Resources</a>
+      <div class="mobile-subnav">
+        <a href="/resources/blog/">— Blog</a>
+        <a href="/resources/case-studies/">— Case Studies</a>
+      </div>
       <a href="/#contact">Get Started</a>
     </div>
   </header>
-
   <main>
     <section class="rx-hero">
       <div class="rx-hero__inner">
         <span class="rx-eyebrow"><span class="rx-eyebrow__dot"></span>Mission Reports</span>
         <h1 class="rx-hero__title">Search growth, <em>measured</em>.</h1>
         <p class="rx-hero__subtitle">Real results from real clients. Traffic lifts, rankings, and why AI started citing them.</p>
-        <div class="rx-hero__meta">
-          <span>Synced from Contentful</span>
-          <span class="rx-hero__meta-divider"></span>
-          <span>Filed from the field</span>
-        </div>
+        <div class="rx-hero__meta"><span>01 REPORTS</span><span class="rx-hero__meta-divider"></span><span>Filed from the field</span></div>
       </div>
     </section>
-
     <div class="rx-crumb__wrap">
-      <nav class="rx-crumb" aria-label="Breadcrumb">
-        <a href="/">Home</a><span class="rx-crumb__sep">›</span><a href="/resources/">Resources</a><span class="rx-crumb__sep">›</span><span>Case Studies</span>
-      </nav>
+      <nav class="rx-crumb" aria-label="Breadcrumb"><a href="/">Home</a><span class="rx-crumb__sep">›</span><a href="/resources/">Resources</a><span class="rx-crumb__sep">›</span><span>Case Studies</span></nav>
     </div>
-
     <div class="rx-missions" data-fp-stagger>
       <div class="rx-log__empty">Case studies are synced from Contentful. Run <code>npm run generate</code> to build the listing, or add entries via the Page – Case Study content type.</div>
     </div>
   </main>
-
   <footer class="site-footer">
     <div class="container footer-content">
       <div class="footer-brand">
@@ -103,5 +108,4 @@
     <p>&copy; 2025 TheSEOPilot. All rights reserved.</p>
   </div>
 </body>
-
 </html>
