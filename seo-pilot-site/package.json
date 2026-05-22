@@ -7,7 +7,9 @@
     "dev": "npx http-server -p 8000 -c-1",
     "generate": "node scripts/generate-resources.js",
     "debug-contentful": "node scripts/debug-contentful.js",
-    "push-content": "node scripts/push-to-contentful.js"
+    "push-content": "node scripts/push-to-contentful.js",
+    "index-urls": "node scripts/index-urls.js",
+    "update-sitemap": "node scripts/regenerate-sitemap.js"
   },
   "keywords": [
     "seo",
@@ -22,6 +24,7 @@
     "@contentful/rich-text-types": "^16.0.0",
     "contentful-management": "^12.5.0",
     "dotenv": "^16.3.1",
+    "googleapis": "^144.0.0",
     "gray-matter": "^4.0.3"
   },
   "dependencies": {}

@@ -48,3 +48,7 @@ node_modules/
 dist/
 build/
 
+# Indexing queue — local state for push-content + index-urls
+content/.indexing-queue.jsonl
+content/.indexing-queue.jsonl.tmp
+

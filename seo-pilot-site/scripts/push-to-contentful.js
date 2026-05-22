@@ -45,6 +45,8 @@ const { toRichText, EMPTY_DOC } = require('./markdown-to-richtext');
 
 const ROOT = path.resolve(__dirname, '..');
 const CONTENT_DIR = path.join(ROOT, 'content');
+const QUEUE_FILE = path.join(CONTENT_DIR, '.indexing-queue.jsonl');
+const SITE_BASE_URL = (process.env.SITE_BASE_URL || 'https://theseopilot.pro').replace(/\/$/, '');
 
 // ---------------------------------------------------------------------------
 // Config
@@ -74,15 +76,51 @@ const CFG = {
 // ---------------------------------------------------------------------------
 
 function parseArgs(argv) {
-  const args = { type: null, slug: null, dryRun: false, draft: false };
+  const args = { type: null, slug: null, dryRun: false, draft: false, noQueue: false };
   for (const raw of argv.slice(2)) {
     if (raw === '--dry-run') args.dryRun = true;
     else if (raw === '--draft') args.draft = true;
+    else if (raw === '--no-queue') args.noQueue = true;
     else if (raw.startsWith('--type=')) args.type = raw.slice('--type='.length);
     else if (raw.startsWith('--slug=')) args.slug = raw.slice('--slug='.length);
     else console.warn(`Unknown arg: ${raw}`);
   }
   return args;
+}
+
+// ---------------------------------------------------------------------------
+// Indexing queue (JSON Lines) — only appended on successful publish
+// ---------------------------------------------------------------------------
+
+function queueUrl(url, type, slug) {
+  fs.mkdirSync(path.dirname(QUEUE_FILE), { recursive: true });
+  // De-dupe: if the same URL is already pending/submitted, replace; otherwise append.
+  let existing = [];
+  if (fs.existsSync(QUEUE_FILE)) {
+    const raw = fs.readFileSync(QUEUE_FILE, 'utf8');
+    for (const line of raw.split(/\r?\n/)) {
+      if (!line.trim()) continue;
+      try { existing.push(JSON.parse(line)); } catch (_) {}
+    }
+  }
+  const without = existing.filter((x) => x.url !== url);
+  without.push({
+    url,
+    type,
+    slug,
+    queuedAt: new Date().toISOString(),
+    status: 'pending',
+  });
+  const tmp = QUEUE_FILE + '.tmp';
+  fs.writeFileSync(tmp, without.map((x) => JSON.stringify(x)).join('\n') + '\n', 'utf8');
+  fs.renameSync(tmp, QUEUE_FILE);
+}
+
+function urlForCaseStudy(slug) {
+  return `${SITE_BASE_URL}/resources/case-studies/${encodeURIComponent(slug)}/`;
+}
+function urlForBlog(slug) {
+  return `${SITE_BASE_URL}/resources/blog/${encodeURIComponent(slug)}/`;
 }
 
 const ARGS = parseArgs(process.argv);
@@ -295,6 +333,10 @@ async function pushCaseStudy(cma, parsed, opts) {
     },
   };
   const result = await upsertByField(cma, CFG.csType, CFG.csSlugField, slug, csPlain, opts);
+  // Queue URL for indexing only when actually published (not draft)
+  if (!opts.draft && !opts.noQueue) {
+    queueUrl(urlForCaseStudy(slug), 'case-study', slug);
+  }
   return { csAction: result.action, csId: result.entry.sys.id, seoId: seoEntry.sys.id };
 }
 
@@ -333,6 +375,9 @@ async function pushBlog(cma, parsed, opts) {
     },
   };
   const result = await upsertByField(cma, CFG.blogType, CFG.blogSlugField, slug, blogPlain, opts);
+  if (!opts.draft && !opts.noQueue) {
+    queueUrl(urlForBlog(slug), 'blog', slug);
+  }
   return { blogAction: result.action, blogId: result.entry.sys.id, seoId: seoEntry.sys.id };
 }
 
@@ -376,7 +421,7 @@ async function main() {
   }
 
   const cma = new CMA();
-  const opts = { draft: ARGS.draft };
+  const opts = { draft: ARGS.draft, noQueue: ARGS.noQueue };
 
   const summary = { pushed: 0, failed: 0, items: [] };
   for (const p of parsedFiltered) {
