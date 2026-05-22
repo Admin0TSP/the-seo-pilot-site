@@ -6,7 +6,8 @@
     "start": "npx http-server -p 8000 -c-1",
     "dev": "npx http-server -p 8000 -c-1",
     "generate": "node scripts/generate-resources.js",
-    "debug-contentful": "node scripts/debug-contentful.js"
+    "debug-contentful": "node scripts/debug-contentful.js",
+    "push-content": "node scripts/push-to-contentful.js"
   },
   "keywords": [
     "seo",
@@ -16,10 +17,12 @@
   "author": "TheSEOPilot",
   "license": "MIT",
   "devDependencies": {
+    "@contentful/rich-text-from-markdown": "^16.2.1",
     "@contentful/rich-text-html-renderer": "^16.5.2",
     "@contentful/rich-text-types": "^16.0.0",
-    "dotenv": "^16.3.1"
+    "contentful-management": "^12.5.0",
+    "dotenv": "^16.3.1",
+    "gray-matter": "^4.0.3"
   },
   "dependencies": {}
 }
-
