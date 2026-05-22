@@ -168,17 +168,41 @@
     </div>
     <div class="fp-trusted__viewport">
       <ul class="fp-trusted__track" role="list">
-        <!-- The track is duplicated below for a seamless loop. To add a new brand,
-             add it to BOTH copies (or use the data-attribute approach). -->
+        <!-- Each brand appears twice: once as the visible set, once as the
+             seamless-loop duplicate (aria-hidden so screen readers don't repeat).
+             To add a new brand, append it to BOTH halves. -->
+
+        <!-- ===== Visible set ===== -->
         <li class="fp-trusted__item">
           <a href="https://aspora.com" target="_blank" rel="noopener" class="fp-trusted__link" aria-label="Aspora">
             <img src="/assets/img/brand-logos/aspora.png" alt="Aspora" class="fp-trusted__logo" loading="lazy" />
           </a>
         </li>
-        <!-- duplicate set for infinite scroll seam -->
+        <li class="fp-trusted__item">
+          <a href="https://www.teamed.global/" target="_blank" rel="noopener" class="fp-trusted__link" aria-label="Teamed">
+            <img src="/assets/img/brand-logos/teamed.svg" alt="Teamed" class="fp-trusted__logo" loading="lazy" />
+          </a>
+        </li>
+        <li class="fp-trusted__item">
+          <a href="https://larkandpalm.com/" target="_blank" rel="noopener" class="fp-trusted__link" aria-label="Lark + Palm">
+            <img src="/assets/img/brand-logos/lark-palm.webp" alt="Lark + Palm" class="fp-trusted__logo" loading="lazy" />
+          </a>
+        </li>
+
+        <!-- ===== Seamless-loop duplicate (aria-hidden) ===== -->
         <li class="fp-trusted__item" aria-hidden="true">
           <a href="https://aspora.com" target="_blank" rel="noopener" class="fp-trusted__link" tabindex="-1">
             <img src="/assets/img/brand-logos/aspora.png" alt="" class="fp-trusted__logo" loading="lazy" />
+          </a>
+        </li>
+        <li class="fp-trusted__item" aria-hidden="true">
+          <a href="https://www.teamed.global/" target="_blank" rel="noopener" class="fp-trusted__link" tabindex="-1">
+            <img src="/assets/img/brand-logos/teamed.svg" alt="" class="fp-trusted__logo" loading="lazy" />
+          </a>
+        </li>
+        <li class="fp-trusted__item" aria-hidden="true">
+          <a href="https://larkandpalm.com/" target="_blank" rel="noopener" class="fp-trusted__link" tabindex="-1">
+            <img src="/assets/img/brand-logos/lark-palm.webp" alt="" class="fp-trusted__logo" loading="lazy" />
           </a>
         </li>
       </ul>
