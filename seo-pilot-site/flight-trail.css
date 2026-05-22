@@ -522,3 +522,143 @@
   transform: rotate(135deg);
   color: var(--fp-gold);
 }
+
+/* ==========================================================================
+   Trusted-By Marquee — sits between hero and Fold 2
+   Continuous horizontal scroll, gold accent eyebrow, navy logos
+   ========================================================================== */
+
+.fp-trusted {
+  position: relative;
+  padding: 3.25rem 0 3rem;
+  background: #ffffff;
+  border-top: 1px solid rgba(26, 31, 54, 0.06);
+  border-bottom: 1px solid rgba(26, 31, 54, 0.06);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* subtle runway dots under the marquee for theme cohesion */
+.fp-trusted::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background-image: radial-gradient(circle, var(--fp-gold) 1px, transparent 1px);
+  background-size: 12px 1px;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.fp-trusted__eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  margin: 0 0 1.75rem;
+  font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #5b657a;
+}
+
+.fp-trusted__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--fp-gold);
+  box-shadow: 0 0 8px rgba(246, 201, 92, 0.55);
+}
+
+/* Viewport: soft fades on both edges so logos enter/exit cleanly */
+.fp-trusted__viewport {
+  position: relative;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent 0, black 8%, black 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, black 8%, black 92%, transparent 100%);
+}
+
+/* The scrolling track */
+.fp-trusted__track {
+  display: flex;
+  align-items: center;
+  gap: 4.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: max-content;
+  animation: fp-trusted-scroll 28s linear infinite;
+}
+
+@keyframes fp-trusted-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.fp-trusted:hover .fp-trusted__track {
+  animation-play-state: paused;
+}
+
+.fp-trusted__item {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.fp-trusted__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.25rem;
+  color: var(--fp-navy);
+  text-decoration: none;
+  filter: grayscale(20%);
+  opacity: 0.78;
+  transition: opacity 0.25s ease, filter 0.25s ease, transform 0.25s ease;
+}
+
+.fp-trusted__link:hover,
+.fp-trusted__link:focus-visible {
+  opacity: 1;
+  filter: grayscale(0%);
+  transform: translateY(-1px);
+}
+
+/* If a brand provides an image logo (preferred when you have it) */
+.fp-trusted__logo {
+  height: 28px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
+/* Text wordmark fallback */
+.fp-trusted__wordmark {
+  font-family: 'Fraunces', 'Playfair Display', Georgia, serif;
+  font-size: 1.65rem;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--fp-navy);
+}
+
+@media (max-width: 760px) {
+  .fp-trusted { padding: 2.5rem 0; }
+  .fp-trusted__eyebrow { font-size: 0.65rem; letter-spacing: 0.22em; margin-bottom: 1.25rem; }
+  .fp-trusted__track { gap: 3rem; animation-duration: 22s; }
+  .fp-trusted__wordmark { font-size: 1.4rem; }
+  .fp-trusted__logo { height: 22px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fp-trusted__track {
+    animation: none;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 2.5rem 3rem;
+  }
+}

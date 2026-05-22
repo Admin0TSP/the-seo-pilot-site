@@ -1,43 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Core Pages -->
   <url>
     <loc>https://theseopilot.pro/</loc>
-    <lastmod>2026-01-15</lastmod>
+    <lastmod>2026-05-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.00</priority>
   </url>
-  <!-- Legal / Policy Pages -->
   <url>
     <loc>https://theseopilot.pro/privacy/</loc>
-    <lastmod>2025-12-05</lastmod>
+    <lastmod>2026-05-22</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.50</priority>
   </url>
   <url>
     <loc>https://theseopilot.pro/terms/</loc>
-    <lastmod>2025-12-05</lastmod>
+    <lastmod>2026-05-22</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.50</priority>
   </url>
-  <!-- Resources & Blog Pages -->
   <url>
     <loc>https://theseopilot.pro/resources/</loc>
-    <lastmod>2026-01-12</lastmod>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://theseopilot.pro/resources/blog/</loc>
+    <lastmod>2026-05-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://theseopilot.pro/resources/case-studies/</loc>
-    <lastmod>2026-01-12</lastmod>
+    <lastmod>2026-05-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://theseopilot.pro/resources/blog/</loc>
-    <lastmod>2026-01-28</lastmod>
+    <loc>https://theseopilot.pro/resources/blog/seo-vs-geo-how-search-visibility-has-changed/</loc>
+    <lastmod>2026-02-04</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
+    <priority>0.80</priority>
   </url>
   <url>
     <loc>https://theseopilot.pro/resources/blog/what-is-generative-engine-optimization/</loc>
@@ -46,9 +49,81 @@
     <priority>0.80</priority>
   </url>
   <url>
-    <loc>https://theseopilot.pro/resources/blog/seo-vs-geo-how-search-visibility-has-changed/</loc>
-    <lastmod>2026-02-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.80</priority>
+    <loc>https://theseopilot.pro/resources/case-studies/ziab-nanobody-research-pipeline/</loc>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://theseopilot.pro/resources/case-studies/vitaclean-vitamin-c-shower-head/</loc>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://theseopilot.pro/resources/case-studies/smartforge-microfluidics-rfq-pipeline/</loc>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://theseopilot.pro/resources/case-studies/roshambo-eyewear-ai-cited-dtc/</loc>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://theseopilot.pro/resources/case-studies/jac-interiors-la-fl-dual-market/</loc>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://theseopilot.pro/resources/case-studies/haute-caviar-luxury-search-dominance/</loc>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://theseopilot.pro/resources/case-studies/graasi-organic-barley-water-category-build/</loc>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://theseopilot.pro/resources/case-studies/edinco-eco-oral-care-subscription/</loc>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://theseopilot.pro/resources/case-studies/defined-sleep-clinical-cbd-geo/</loc>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://theseopilot.pro/resources/case-studies/celf-beauty-microvibration-geo/</loc>
+    <lastmod>2026-05-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://theseopilot.pro/resources/case-studies/teamed-global-eor-mql-growth/</loc>
+    <lastmod>2026-05-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://theseopilot.pro/resources/case-studies/larkandpalm-marin-design-visibility/</loc>
+    <lastmod>2026-05-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://theseopilot.pro/resources/case-studies/aspora-ai-visibility/</loc>
+    <lastmod>2026-05-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
   </url>
 </urlset>

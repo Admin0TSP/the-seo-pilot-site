@@ -159,6 +159,32 @@
     </div>
   </header>
 
+  <!-- ========== Trusted-By Marquee ========== -->
+  <section class="fp-trusted" aria-label="Brands TheSEOPilot has worked with">
+    <div class="fp-trusted__eyebrow">
+      <span class="fp-trusted__dot"></span>
+      Trusted by growing brands
+      <span class="fp-trusted__dot"></span>
+    </div>
+    <div class="fp-trusted__viewport">
+      <ul class="fp-trusted__track" role="list">
+        <!-- The track is duplicated below for a seamless loop. To add a new brand,
+             add it to BOTH copies (or use the data-attribute approach). -->
+        <li class="fp-trusted__item">
+          <a href="https://aspora.com" target="_blank" rel="noopener" class="fp-trusted__link" aria-label="Aspora">
+            <img src="/assets/img/brand-logos/aspora.png" alt="Aspora" class="fp-trusted__logo" loading="lazy" />
+          </a>
+        </li>
+        <!-- duplicate set for infinite scroll seam -->
+        <li class="fp-trusted__item" aria-hidden="true">
+          <a href="https://aspora.com" target="_blank" rel="noopener" class="fp-trusted__link" tabindex="-1">
+            <img src="/assets/img/brand-logos/aspora.png" alt="" class="fp-trusted__logo" loading="lazy" />
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
   <!-- ========== FOLD 2: Who We Serve ========== -->
   <section class="section section-audience" id="audience">
     <div class="container">
