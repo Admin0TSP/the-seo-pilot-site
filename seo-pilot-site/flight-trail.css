@@ -530,7 +530,9 @@
 
 .fp-trusted {
   position: relative;
+  z-index: 5;
   padding: 3.25rem 0 3rem;
+  min-height: 150px;
   background: #ffffff;
   border-top: 1px solid rgba(26, 31, 54, 0.06);
   border-bottom: 1px solid rgba(26, 31, 54, 0.06);
