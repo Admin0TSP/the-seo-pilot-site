@@ -2,39 +2,57 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://theseopilot.pro/</loc>
-    <lastmod>2026-05-29</lastmod>
+    <lastmod>2026-05-31</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.00</priority>
   </url>
   <url>
     <loc>https://theseopilot.pro/privacy/</loc>
-    <lastmod>2026-05-29</lastmod>
+    <lastmod>2026-05-31</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.50</priority>
   </url>
   <url>
     <loc>https://theseopilot.pro/terms/</loc>
-    <lastmod>2026-05-29</lastmod>
+    <lastmod>2026-05-31</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.50</priority>
   </url>
   <url>
     <loc>https://theseopilot.pro/resources/</loc>
-    <lastmod>2026-05-29</lastmod>
+    <lastmod>2026-05-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://theseopilot.pro/resources/blog/</loc>
-    <lastmod>2026-05-29</lastmod>
+    <lastmod>2026-05-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://theseopilot.pro/resources/case-studies/</loc>
-    <lastmod>2026-05-29</lastmod>
+    <lastmod>2026-05-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://theseopilot.pro/resources/blog/shopify-seo-checklist-2026/</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://theseopilot.pro/resources/blog/best-ai-seo-tools-2026/</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://theseopilot.pro/resources/blog/how-to-rank-in-chatgpt-2026-guide/</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
   </url>
   <url>
     <loc>https://theseopilot.pro/resources/blog/programmatic-seo-when-it-works-when-it-backfires/</loc>
