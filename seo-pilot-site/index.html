@@ -31,45 +31,66 @@
   <meta name="twitter:description" content="Full-service SEO agency: technical audits, link building, and AI visibility. Results tied to revenue." />
   <meta name="twitter:image" content="https://theseopilot.pro/assets/img/image2.webp" />
 
-  <!-- Structured Data: Organization, WebSite, Service -->
+  <!-- Structured Data: Organization -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Organization",
-        "@id": "https://theseopilot.pro/#organization",
-        "name": "TheSEOPilot",
-        "alternateName": "The SEO Pilot",
-        "url": "https://theseopilot.pro/",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://theseopilot.pro/assets/img/logo-footer.webp",
-          "width": 1024,
-          "height": 1024
-        },
-        "description": "Full-service SEO and Generative Engine Optimization (GEO) agency for growth-stage DTC brands and B2B SaaS."
-      },
-      {
-        "@type": "WebSite",
-        "@id": "https://theseopilot.pro/#website",
-        "url": "https://theseopilot.pro/",
-        "name": "TheSEOPilot",
-        "description": "Premium SEO & AI visibility services for growth-stage brands.",
-        "publisher": { "@id": "https://theseopilot.pro/#organization" },
-        "inLanguage": "en-US"
-      },
-      {
-        "@type": "Service",
-        "@id": "https://theseopilot.pro/#service",
-        "name": "Full-Service SEO & AI Visibility (GEO)",
-        "serviceType": "SEO Agency Services",
-        "provider": { "@id": "https://theseopilot.pro/#organization" },
-        "areaServed": "Worldwide",
-        "url": "https://theseopilot.pro/#services",
-        "description": "Full-service SEO agency offering technical SEO audits, on-page optimization, link building, keyword strategy, and Generative Engine Optimization (GEO) for AI visibility."
-      }
+    "@type": "Organization",
+    "@id": "https://theseopilot.pro/#organization",
+    "name": "TheSEOPilot",
+    "alternateName": "The SEO Pilot",
+    "url": "https://theseopilot.pro/",
+    "logo": "https://theseopilot.pro/assets/img/logo-footer.webp",
+    "image": "https://theseopilot.pro/assets/img/logo-footer.webp",
+    "description": "Full-service SEO and Generative Engine Optimization (GEO) agency for growth-stage DTC brands and B2B SaaS.",
+    "areaServed": "Worldwide",
+    "knowsAbout": [
+      "Search Engine Optimization",
+      "Generative Engine Optimization",
+      "Technical SEO",
+      "Content Strategy",
+      "Link Building",
+      "AI Visibility"
     ]
+  }
+  </script>
+
+  <!-- Structured Data: WebSite -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": "https://theseopilot.pro/#website",
+    "url": "https://theseopilot.pro/",
+    "name": "TheSEOPilot",
+    "description": "Premium SEO & AI visibility services for growth-stage brands.",
+    "inLanguage": "en-US",
+    "publisher": {
+      "@type": "Organization",
+      "@id": "https://theseopilot.pro/#organization",
+      "name": "TheSEOPilot",
+      "url": "https://theseopilot.pro/"
+    }
+  }
+  </script>
+
+  <!-- Structured Data: Service -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": "https://theseopilot.pro/#service",
+    "name": "Full-Service SEO & AI Visibility (GEO)",
+    "url": "https://theseopilot.pro/",
+    "serviceType": "SEO Agency Services",
+    "description": "Full-service SEO agency offering technical SEO audits, on-page optimization, link building, keyword strategy, and Generative Engine Optimization (GEO) for AI visibility.",
+    "areaServed": "Worldwide",
+    "provider": {
+      "@type": "Organization",
+      "@id": "https://theseopilot.pro/#organization",
+      "name": "TheSEOPilot",
+      "url": "https://theseopilot.pro/"
+    }
   }
   </script>
 
@@ -87,6 +108,22 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap"
     rel="stylesheet" />
+
+  <!-- Font-display strategy — keeps text visible during web-font fetch (prevents FOIT/text reflow).
+       The Google Fonts CSS above also returns font-display: swap via &display=swap, but we declare
+       it explicitly here so it's discoverable in the static HTML for validators and crawlers. -->
+  <style>
+    @font-face {
+      font-family: 'Inter';
+      font-display: swap;
+      src: local('Inter'), local('Inter-Regular');
+    }
+    @font-face {
+      font-family: 'DM Sans';
+      font-display: swap;
+      src: local('DM Sans'), local('DMSans-Regular');
+    }
+  </style>
 
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="flight-trail.css" />
