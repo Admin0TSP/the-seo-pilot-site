@@ -17,6 +17,22 @@ services:
       - path: /*
         name: Referrer-Policy
         value: strict-origin-when-cross-origin
+      # HTTPS lockdown — tells browsers to never load this site over HTTP again,
+      # and makes the domain eligible for the HSTS preload list.
+      - path: /*
+        name: Strict-Transport-Security
+        value: max-age=63072000; includeSubDomains; preload
+      # Permissions-Policy — explicitly deny powerful APIs we don't use.
+      - path: /*
+        name: Permissions-Policy
+        value: camera=(), microphone=(), geolocation=(), payment=(), usb=(), accelerometer=(), gyroscope=()
+      # Site-wide Content-Security-Policy. Allows the third-party origins we
+      # actually use (Google Tag Manager, GA, Google Fonts, Contentful for the
+      # blog preview API) and blocks everything else. Adjust if you add new
+      # third parties.
+      - path: /*
+        name: Content-Security-Policy
+        value: "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://*.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; media-src 'self' https:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://*.contentful.com https://cdn.contentful.com https://preview.contentful.com; frame-src 'self' https://www.googletagmanager.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
       - path: /assets/*
         name: Cache-Control
         value: public, max-age=31536000, immutable
@@ -29,10 +45,14 @@ services:
       - path: /*.js
         name: Cache-Control
         value: public, max-age=31536000, immutable
-      # Allow Contentful to embed blog preview in iframe (Settings → Content preview)
+      # Allow Contentful to embed blog preview in iframe (Settings → Content preview).
+      # This overrides the site-wide frame-ancestors policy above for this path only.
       - path: /blog-preview
         name: Content-Security-Policy
-        value: frame-ancestors 'self' https://app.contentful.com https://be.contentful.com https://*.contentful.com;
+        value: "frame-ancestors 'self' https://app.contentful.com https://be.contentful.com https://*.contentful.com;"
+    # Render automatically serves /404.html for any unmatched route on static
+    # sites — no explicit route config needed beyond the file existing at the
+    # site root, which we've added.
 
   - type: web
     name: tsp-blog-preview-api
