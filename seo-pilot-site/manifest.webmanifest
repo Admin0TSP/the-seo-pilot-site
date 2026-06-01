@@ -1,0 +1,23 @@
+{
+  "name": "TheSEOPilot",
+  "short_name": "SEO Pilot",
+  "description": "Premium SEO & AI visibility (GEO) services for growth-stage brands.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a1f36",
+  "icons": [
+    {
+      "src": "/assets/img/logo-footer-circular.png",
+      "sizes": "730x730",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

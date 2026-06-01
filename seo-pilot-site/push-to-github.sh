@@ -34,7 +34,7 @@ LOCAL_SITE="/Users/shipsy/Downloads/seo-pilot-site/seo-pilot-site"
 CLONE_DIR="$HOME/Downloads/the-seo-pilot-site-clone"
 REPO_URL="https://github.com/Admin0TSP/the-seo-pilot-site.git"
 BRANCH="main"
-COMMIT_MSG="Add trusted-by marquee with Aspora logo + new-laptop setup guide"
+COMMIT_MSG="${COMMIT_MSG:-Sync site updates to main}"
 
 # ---------------------------------------------------------------------------
 # 1. Clone (or refresh) the remote repo locally
